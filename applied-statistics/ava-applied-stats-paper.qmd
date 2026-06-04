@@ -1,0 +1,68 @@
+---
+title: "Applied Statistical Analysis in Sports"
+author: "Ava Mizrahi"
+format:
+  html: default
+  pdf: default
+fontsize: 11pt
+---
+College football is a form of American football played by teams representing universities and colleges. It is one of the most popular sports to spectate in the United States. A game consists of four 15-minute quarters and the teams alternate  between possessing the ball (offense) and trying to stop the offense (defense). The teams try to score the most points by getting the ball into the opponent’s end zone or kicking it through the goalposts. A touchdown is worth 6 points and is when the ball crosses the opponent’s goal line or a player catches it in the end zone. After a touchdown, the scoring team can try to kick the ball through the goalposts for an extra point. A field goal is when the ball is kicked through the goalposts during general play and is worth 3 points. The difference between the points a team scores and the points it allows is called point differential. Offenses in college football have four downs to gain ten yards. Teams need to consistently move the ball so they can create scoring chances. Two major measures of offensive activity are passing yards and rushing yards. Passing yards are the yards gained when the quarterback throws the ball to a receiver, and rushing yards are the yards gained when a player runs with the ball. If the offense drops the ball (fumbles) or the ball is caught by the defense (interception), the defense gains possession and this is called a turnover.
+
+This analysis will investigate whether passing yards, rushing yards, and turnovers can significantly describe the disparities in point differential for Michigan football games between 2018 to 2025. This is meaningful because point differential can determine football success and influence rankings and selections. Michigan is a high performing team with recent aspirations of going to the championships, so these statistics could help answer questions about prioritizing rushing or passing and seeing how avoiding turnovers could impact point differential. Passing yards, rushing yards, and turnovers each represent an important part of success in football. Passing yards and rushing yards show offensive activities and determine how effectively a team moves the ball. Turnovers represent mistakes that can ruin scoring opportunities and give the opponent more possession. Looking at these measures would help with strategy, game plan, recruiting, and allocating resources during games. Before conducting the analysis, I expect to find that turnovers will have the highest impact on point differential because turnovers can quickly redirect a game and end a scoring opportunity. I also expect passing and rushing yards to both have positive correlation with point differential because when teams gain more yards they are more likely to score points. 
+
+My data was collected from Sports-Reference and has Michigan game logs from each season between 2018 and 2025. Each row in the dataset represents one game played by Michigan. I put each season’s data into a CSV and manually added each new season to the same dataset in Excel. The dataset includes the opponent, date, result, points scored, points allowed, passing statistics, rushing statistics, penalties, and turnovers. My main variables that I’ll be looking at are passing yards, rushing yards, turnovers, and point differential. Point differential is the number of points Michigan scored minus the number of points scored by their opponent. I added the CSV into a data folder in my Positron and then loaded the CSV using pandas. While this dataset contains many crucial variables, there are some limitations to it. It looks at only games played by Michigan, so this analysis will not apply to every college football team. Also, it only spans 8 years, so the sample size is not huge and does not span every single game Michigan has ever played. Lastly, the dataset does not include some more specific variables that could also be used for analysis such as third down conversion rate or field position. 
+
+```{python}
+import pandas as pd
+import matplotlib.pyplot as plt
+import statsmodels.api as sm
+
+# Load data
+michigan = pd.read_csv("data/Michigan_FB_2018-2025.csv")
+
+# drop first row 
+michigan = michigan.iloc[1:].copy()
+
+# rename columns that are messy
+michigan = michigan.rename(columns={"Unnamed: 6": "Pts", "Unnamed: 7": "OppPts", "Passing.3": "PassYds", "Rushing.1": "RushYds"})
+
+# Fix duplicate Turnover column names 
+cols = list(michigan.columns)
+cols[36] = "FumblesLost"
+cols[37] = "Interceptions"
+cols[38] = "Turnovers"
+michigan.columns = cols
+```
+
+```{python}
+# convert columns to numeric type
+numeric_cols = ["Pts", "OppPts", "PassYds", "RushYds", "Turnovers"]
+for col in numeric_cols:
+    michigan[col] = pd.to_numeric(michigan[col], errors="coerce")
+
+# Create point differential variable
+michigan["PointDiff"] = michigan["Pts"] - michigan["OppPts"]
+```
+
+
+```{python}
+# create dataset for regression
+regression_df = michigan[["PointDiff", "PassYds", "RushYds", "Turnovers"]].dropna()
+
+X = regression_df[["PassYds", "RushYds", "Turnovers"]]
+y = regression_df["PointDiff"]
+
+# Run regression
+X = sm.add_constant(X)
+mod = sm.OLS(y, X).fit()
+print(mod.summary())
+```
+
+I used a multiple linear regression because I’m using several explanatory variables at the same time to explain variation with point differential as a continuous response variable. The explanatory variables in my model are passing yards, rushing yards, and turnovers. A multiple regression is useful here because it is estimating the relationship between each variable and point differential while the other variables are being held constant. The regression model used is $\text{Point Differential}_i = \beta_0 + \beta_1(\text{Passing Yards}_i) + \beta_2(\text{Rushing Yards}_i) + \beta_3(\text{Turnovers}_i) + \varepsilon_i$. $i$ represents a single game played by Michigan. $\beta_0$ is the intercept, $\beta_1$ is the coefficient for passing yards, $\beta_2$ is the coefficient for rushing yards, and $\beta_3$ is the coefficient for turnovers. The error term, $\varepsilon_i$, is the variation in point differential that cannot be explained by the model. After performing the analysis, the fitted model is $\widehat{\text{Point Differential}} = -23.10 + 0.0924(\text{Passing Yards}) + 0.1394(\text{Rushing Yards}) - 8.0994(\text{Turnovers})$. This means that one additional passing yard is associated with an increase of about $0.092$ points in Michigan’s point differential, one additional rushing yard is associated with an increase of about $0.139$ points, and one additional turnover is associated with a decrease of about $8.10$ points. The model was statistically significant with an F-statistic of $35.99$ and a p-value below $0.001$.  The model’s $R^2 = 0.527$, so about $52.7$% of the variation in Michigan’s point differential is explained by passing yards, rushing yards, and turnovers. Also, each individual predictor was statistically significant. 
+
+These results show that both offensive success and mistakes matter, but not in the same way. Passing yards and rushing yards were both associated with larger point differentials, meaning Michigan generally performed better when it moved the ball effectively. Turnovers had a large negative coefficient, which means that making turnovers has a harmful effect on scoring margin. Rushing efficiency had a stronger positive relationship with point differential than passing, but since both of these can measure offensive success, their significance may overlap slightly. Overall, a multiple linear regression fits this thesis because it measures how passing yards, rushing yards, and turnovers correspond with Michigan’s scoring margins. This method allows us to see how each variable explains variation in point differential and how big the relationships are.  
+
+In conclusion, passing yards, rushing yards, and turnovers were all statistically significant predictors of point differential of Michigan football games from 2018-2025. More turnovers were associated with worse scoring margins, while higher passing yards and rushing yards were associated with better scoring margins. The model explains about $52.7$% of the variation in the data and turnovers had the strongest negative correlation with point differential. However, the model does not explain everything because almost half of the variation still remains unaccounted for. These findings could be useful because they suggest that offensive yardage is not strong enough by itself to make better scoring margins. Reducing turnovers should be a major priority for the Michigan coaches, since mistakes had the largest impact on point differentials. Also, consistent offensive production contributed to better performances. Coaches should not only focus on offensive strategy, but also focus on protecting possessions and reducing errors. 
+
+There are several ways this analysis could be improved in the future. First, the dataset could be expanded to include more seasons of data for Michigan or even other college football teams. With more data, the model would be more accurate than these results that only account for one team over a set of years. Including other teams could make the findings more generalized and not specific to only Michigan. Another improvement would be to add more explanatory variables that could affect point differential. Variables such as opponent strength, field position, or red zone efficiency could all help explain scoring margins. These variables could help account for some of the half of the variation that remains unnexplained. The analysis could also be improved by checking for model assumptions in depth. In the future, multicollinearity could be tested for along with a comparison of alternate models. Also, turnovers could be separated by fumbles and interceptions to get a more detailed understanding of the data. 
+

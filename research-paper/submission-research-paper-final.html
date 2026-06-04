@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.26">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Ava Mizrahi">
+
+<title>Research Paper — Advanced Analytics in Sports</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="submission-research-paper-final_files/libs/clipboard/clipboard.min.js"></script>
+<script src="submission-research-paper-final_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="submission-research-paper-final_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="submission-research-paper-final_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="submission-research-paper-final_files/libs/quarto-html/popper.min.js"></script>
+<script src="submission-research-paper-final_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="submission-research-paper-final_files/libs/quarto-html/anchor.min.js"></script>
+<link href="submission-research-paper-final_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="submission-research-paper-final_files/libs/quarto-html/quarto-syntax-highlighting-587c61ba64f3a5504c4d52d930310e48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="submission-research-paper-final_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="submission-research-paper-final_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="submission-research-paper-final_files/libs/bootstrap/bootstrap-2b4f361af69db28df83f62e4f62372d0.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="submission-research-paper-final.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Research Paper — Advanced Analytics in Sports</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Ava Mizrahi </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>In modern sports analytics, many of the traditional statistics used do not provide a full understanding of performance of players and teams. Soccer is a low scoring game, so this problem is especially heightened since outcomes can be highly influenced by randomness instead of skill. Because of this, analysts created a metric called expected goals (xG) that provides each shot with a probability of resulting in a goal that is based on different factors such as angle, distance from the goal, body part used to make the shot, and defensive pressure. xG is a great metric, but it isn’t without its faults.</p>
+<p>This article, “Separating Chance Quality and Player Ability in xG,” written by Alex Felices, focuses on how the xG metric can be improved when analyzing soccer players and teams. The main thesis is that traditional xG models do not distinguish between the quality of a scoring opportunity and the skill of the player taking the shot. This can lead to a misinterpretation of a player or team’s skill. The article aims to determine whether players who consistently exceed their xG are truly better finishers or whether existing models are missing important contextual factors.</p>
+<p>To address this concern, the article reviews a study that developed its own xG model using event stream data, which is data that contains a sequential track of every move on the ball during a match such as passes, shots, fouls, dribbles, etc. along with additional contextual measures. Felices begins with an explanation of how crucial the xG metric has become to performance analysis, recruitment, and betting with soccer. The author wants to create a new xG model that is more reliable for predicting the likelihood of a shot being a goal and make it similar to industry models.</p>
+<p>The model focuses only on open play shots, which are shots that are taken during live gameplay rather than from a corner kick, free kick, or penalty. The model uses a dataset of over 15,000 shots from La Liga. Initially, 95 variables were considered, which were later reduced to a smaller set of important features, including spatial data, contextual information (such as defender and goalkeeper positioning), and shot characteristics. The model began with a logistic regression baseline, which performed poorly by underpredicting high quality chances of a goal. After adding more variables, the model’s accuracy was greatly improved. The final model using machine learning along with additional variables enhanced performance and gave results that matched closely with real world outcomes.</p>
+<p>The author then introduces position adjusted and player adjusted xG models. After analyzing forwards, midfielders, and defenders, it was found that forwards were the most efficient finishers compared to midfielders and defenders and this increased xG. This model proves that the ability to finish varies significantly by position. Next, Lionel Messi was used as a case study for the player adjusted model since he tends to exceed his predicted goals. When the Messi adjusted model was applied to all players, the total xG increased significantly. This means that individual players have a measurable difference in finishing ability and it can vary significantly by player.</p>
+<p>By determining that both individual player and position can impact xG, the author concludes that the traditional xG metric is limited since it does not account for player skill or position and having that additional context improves accuracy. This adjusted xG model allows for a more accurate prediction of performance.</p>
+<p>The key metric in this article is xG (expected goals), along with the article’s addition of the player and position adjusted xG models. Expected goals is a statistic that assigns each shot a value between 0 and 1, where 0 means the shot had almost no chance of becoming a goal and 1 would mean the shot was almost certain to become a goal. For example, a shot from far outside the box might have an xG of 0.03, which means shots like that are scored about 3% of the time, while a closer shot right in front of an open goal might have an xG of 0.80.</p>
+<p>The first step of calculating xG is to build a dataset of past shots where each row in the dataset represents one shot, and the response variable shows whether the shot became a goal (0 for no goal, 1 for a goal). The dataset also includes predictors that describe the shot. In the model used in the article, these variables are factors such as the distance from goal, the angle to goal, the body part used, goalkeeper position, defender pressure, and other contextual aspects.</p>
+<p>After the dataset is built, most of the time, a logistic regression model is used to fit a probability of scoring since the outcome is binary (0 or 1). The logistic regression model is</p>
+<p><span class="math display">\[
+P(\text{goal}) = \frac{1}{1 + e^{-(\beta_0 + \beta_1 x_1 + \beta_2 x_2 + \cdots + \beta_n x_n)}}
+\]</span></p>
+<p>where each <span class="math inline">\(x_i\)</span> represents an attribute of the shot (distance, angle, etc.) and each <span class="math inline">\(\beta_i\)</span> is a coefficient estimated from the data.</p>
+<p>The total expected goals is calculated as:</p>
+<p><span class="math display">\[
+\text{Total xG} = \sum_{i=1}^{n} xG_i
+\]</span> For example, if a shot has its corresponding values plugged into the model and gives an output of <span class="math inline">\(P(\text{goal}) = 0.11\)</span>, this means the shot has an 11% chance of being scored based on historic shots with similar statistics.</p>
+<p>This article improves this model by adding more detailed contextual features since the basic model may miss important details. Also, the player and position adjusted xG models were created to expand further. The model in the article is no longer a basic xG model that only estimates the probability that an average player would score the shot. It now can estimate the probability that a specific player with a certain position will score.</p>
+<p>To show how the xG metric works in practice, I made a simpler version of an expected goals model. Since I did not have access to the same API that the article used, I used a smaller CSV with less columns. The article explains how xG is built using logistic regression and shot level data, so I used a dataset where each row is a single shot. For my simpler model, I used shot distance and body part as predictors, and the predicted probability represents the xG for each shot.</p>
+<div id="92550b9f" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Import dataset</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>shot_data <span class="op">=</span> pd.read_csv(<span class="st">"soccer_shots_distance.csv"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>shot_data.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">match_id</th>
+<th data-quarto-table-cell-role="th">shot_outcome</th>
+<th data-quarto-table-cell-role="th">shot_type</th>
+<th data-quarto-table-cell-role="th">shot_body_part</th>
+<th data-quarto-table-cell-role="th">distance</th>
+<th data-quarto-table-cell-role="th">competition_name</th>
+<th data-quarto-table-cell-role="th">season_name</th>
+<th data-quarto-table-cell-role="th">source_file</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>18242</td>
+<td>Off T</td>
+<td>Open Play</td>
+<td>Right Foot</td>
+<td>20.000000</td>
+<td>Champions League</td>
+<td>2014/2015</td>
+<td>Champions_League_2014-2015_shots.csv</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>18242</td>
+<td>Wayward</td>
+<td>Open Play</td>
+<td>Head</td>
+<td>12.369317</td>
+<td>Champions League</td>
+<td>2014/2015</td>
+<td>Champions_League_2014-2015_shots.csv</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>18242</td>
+<td>Goal</td>
+<td>Open Play</td>
+<td>Left Foot</td>
+<td>8.246211</td>
+<td>Champions League</td>
+<td>2014/2015</td>
+<td>Champions_League_2014-2015_shots.csv</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>18242</td>
+<td>Off T</td>
+<td>Open Play</td>
+<td>Right Foot</td>
+<td>22.472205</td>
+<td>Champions League</td>
+<td>2014/2015</td>
+<td>Champions_League_2014-2015_shots.csv</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>18242</td>
+<td>Off T</td>
+<td>Open Play</td>
+<td>Right Foot</td>
+<td>19.313208</td>
+<td>Champions League</td>
+<td>2014/2015</td>
+<td>Champions_League_2014-2015_shots.csv</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="83f3f41a" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create the goal binary variable </span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>shot_data[<span class="st">"goal"</span>] <span class="op">=</span> (shot_data[<span class="st">"shot_outcome"</span>] <span class="op">==</span> <span class="st">"Goal"</span>).astype(<span class="bu">int</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Clean the data</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>shot_data <span class="op">=</span> shot_data[[<span class="st">"goal"</span>, <span class="st">"distance"</span>, <span class="st">"shot_body_part"</span>, <span class="st">"shot_type"</span>]].dropna()</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Use only open play shots like the article </span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>shot_data <span class="op">=</span> shot_data[shot_data[<span class="st">"shot_type"</span>] <span class="op">==</span> <span class="st">"Open Play"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="93788567" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> smf.logit(<span class="st">"goal ~ distance + C(shot_body_part) + C(shot_type)"</span>, data<span class="op">=</span>shot_data).fit()</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>shot_data[<span class="st">"xG"</span>] <span class="op">=</span> model.predict(shot_data)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>summary <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Actual Goals"</span>: [shot_data[<span class="st">"goal"</span>].<span class="bu">sum</span>()],</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Expected Goals"</span>: [shot_data[<span class="st">"xG"</span>].<span class="bu">sum</span>()]</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(summary)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Optimization terminated successfully.
+         Current function value: 0.293346
+         Iterations 7
+   Actual Goals  Expected Goals
+0          1439          1439.0</code></pre>
+</div>
+</div>
+<div id="24bba013" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>plt.scatter(shot_data[<span class="st">"distance"</span>], shot_data[<span class="st">"xG"</span>], alpha<span class="op">=</span><span class="fl">0.2</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Shot Distance"</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"xG"</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Expected Goals vs Shot Distance"</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="submission-research-paper-final_files/figure-html/cell-5-output-1.png" width="589" height="449" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The output of the model and the graph suggest that the probability of scoring decreases as the distance of a shot increases. The main idea of xG is that closer shots are generally more likely to lead to a goal, and my outcome stays consistent with that. The total expected goals matches the total observed goals because the model was trained and evaluated on the same dataset. Overall, this simplified model shows how xG gives a probability to each shot rather than evaluating performance using only goals.</p>
+<p>One of the main strengths of the xG metric is that it is a more accurate measure of performance instead of just shooting percentage. It does take into account that goals are not the only thing that can determine the quality of a player or team. A player could score a lot of goals, but only take the easiest shots. The xG model in general measures the likelihood of a shot becoming a goal, which helps to separate luck from skill. Since soccer is such a low scoring sport, outcomes can be heavily impacted by randomness. With the xG model, analysts can see if a player is over or under performing based on the quality of their chances at a goal, which is helpful for predicting future success because players who are constantly getting high xG are more likely to continue scoring in the future.</p>
+<p>In the article, the xG used is an improvement from traditional xG metrics because it adds more contextual variables for higher accuracy. The model from the article adds variables such as defensive pressure and goalkeeper position. With more variables included, the article’s xG model is able to better simulate real world games and situations. The article also looks at player and position adjusted xG metrics. These adjustments account for differing players and positions rather than assuming everything is the same.</p>
+<p>Even though the xG metric has improved significantly, it still has its limitations. One negative feature about this metric is that a high quality and complete dataset is needed in order to use it. It can be difficult to capture every variable that can influence a shot, even with the additional variables, so some outcomes can still be inaccurate. Also, the article mentions using more complex machine learning methods to improve the model. This would be good for accuracy, but can make it more difficult to understand exactly how each variable individually impacts the outcome.</p>
+<p>Another limitation to the xG metric is that finishing ability is inconsistent and can be difficult to measure in some circumstances. In the real world, players can go through periods of underperforming or overperforming due to external factors which can make it difficult to determine if a player’s performance truly depends on skill or randomness. The model could overestimate differences in finishing ability and blame outcomes on lack of skill when it really could be randomness.</p>
+<p>The improved xG metric directly supports the author’s main argument by showing that traditional xG models may not fully represent player skill level. The author’s thesis is that the traditional xG metric combines skill and chance, which can lead to incorrect conclusions. From introducing more variables and position and player adjustments, the new metric separates skill and chance and proves that the player and position differences make an impact on the outcome. From the example in the article, forwards tend to outperform xG and Lionel Messi also consistently exceeds his xG over time. This supports the claim that some players are just better finishers on average rather than just having better chances at scoring.</p>
+<p>There are still some concerns with using the xG metric to support the argument because the player adjusted model mostly relies on historical data and can be incorrect if the player is on a bad playing streak or just does not have a good amount of data. The model also consistently assumes that the differences between actual and expected goals is solely due to player skill level. This is not always true because there could still be some variation caused by randomness. Due to these limitations, the improved xG metric does not fully prove that luck and skill can completely be separated when determining scoring ability.</p>
+<p>The article mentions using machine learning methods and logistic regression to improve the xG model. Logistic regression is the main method used for predictions. Using a logistic regression model is appropriate because it allows the outcome to be binary (Goal = 1, No Goal = 0) and is easy to interpret probabilities. The article then takes the model to the next level by appropriately incorporating machine learning methods for improvements. Using machine learning methods shows the limitations of a basic model and the benefits of a more advanced model. There are no other main metrics mentioned other than the xG model, which is the main focus of the article.</p>
+<p>Overall, the article shows that even though expected goals (xG) is a beneficial metric for determining player skill level in soccer, there are still some limitations to it that need to be considered during analysis. The author found from looking at players and positions individually, the traditional xG metric can misinterpret skill level and treat players as if they all have the same finishing ability. After using higher level methods to make an improved model, the analysis recognizes that no model can fully capture every aspect of the game and make a completely accurate prediction. However, the xG metric is a more complete and detailed way of analyzing player performance and is a valuable tool in soccer analytics.</p>
+<section id="works-cited" class="level2">
+<h2 class="anchored" data-anchor-id="works-cited">Works Cited</h2>
+<p>Felices, Alex Marin. “Separating Chance Quality and Player Ability in xG.” <em>The xG Football Club</em>, 28 Jan.&nbsp;2026.</p>
+</section>
+<section id="ai-usage-statement" class="level2">
+<h2 class="anchored" data-anchor-id="ai-usage-statement">AI Usage Statement</h2>
+<p>I used AI to understand how to handle categorical variables in logistic regression and to assist with formatting my essay in Quarto.</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

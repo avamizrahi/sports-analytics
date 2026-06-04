@@ -1,0 +1,376 @@
+---
+title: "NBA Clustering"
+format:
+  html:
+    df-print: paged
+  pdf: default
+execute:
+  echo: true
+  warning: false
+jupyter: python3
+---
+
+
+## Introduction to Clustering
+
+So far in this course we have covered two major families of supervised learning:
+
+- **Regression** — predict a *number* (e.g., how many points will a player score?)
+- **Classification** — predict a *known category* (e.g., will this team win or lose?)
+
+Both require a label. Someone had to write down the points scored; someone had to record the win or loss. But what if the categories themselves don't exist yet?
+
+**Clustering** is *unsupervised* learning: the algorithm discovers natural groupings without any pre-assigned labels. This helps us discover sub-groups and "archetypes." Clustering finds these groupings for us by identifying players whose statistics cluster together in space.
+
+**Similarity.** Two players are "similar" if their statistics are close together. We measure closeness with _Euclidean distance_ (there are other metrics, but this is the simplest): 
+
+$$d(x, y) = \sqrt{\sum_{i=1}^n (x_i - y_i)^2}.$$
+
+**Scaling.** Without scaling, one dimension may be more influential than another. For example,   
+
+- The number of points per game ranges from near 0 to over 30,  
+- The number of assists per game ranges from near 0 to about 10.  
+
+Therefore, without adjustment, points are more influential than assists. A one-unit difference in scoring counts for far more than a one-unit difference in assists. To fix this, we scale each feature so they contribute equally to distance.
+
+---
+
+## Objective
+In this lesson we use the **2018 NBA per-game dataset** to find natural player archetypes using only two offensive statistics: **points per game** (`PTS_per_G`) and **assists per game** (`AST`). By limiting ourselves to two dimensions we can visualize every clustering decision on a single 2-D scatter plot.
+
+## Data Description
+We start with loading the data and doing some data exploration. 
+
+```{python}
+import pandas as pd
+import numpy as np
+
+# Load Data
+players_all = pd.read_csv("data/per_game_2018.csv")
+
+# Focus on These Columns
+cols_pg = ["player", "age", "G", "GS", "MP", "FG_per", "3P_per", "2P_per",
+           "FT_per", "TRB", "AST", "STL", "BLK", "TOV", "PTS_per_G", "team"]
+players = players_all[cols_pg]
+```
+
+**Description of the data:**
+
+| Column | Description |
+|--------|-------------|
+| player | Player's Name |
+| age | Player's age |
+| G | Games played |
+| GS | Games started |
+| MP | Minutes played per game |
+| FG_per | Field goal percentage |
+| 3P_per | 3-point percentage (3P/3PA) |
+| 2P_per | 2-point percentage (2P/2PA) |
+| FT_per | Free throw percentage (FT/FTA) |
+| TRB | Total rebounds (ORB + DRB) |
+| AST | Assists |
+| STL | Steals |
+| BLK | Blocks |
+| TOV | Turnovers |
+| PTS_per_G | Points per game |
+| team | Team abbreviation |
+
+---
+
+## Similarity and Scaling
+
+### Comparing Players
+Let's look at a few players and consider how similar/dissimilar they are. How "close" or "similar" are the players? All of them were on the Cleveland Cavaliers in 2018. Let's look at their `PTS_per_G` and `AST` and compute the Euclidean distance between them.
+
+```{python}
+# Filter to Player Data
+players[
+  (players['player'] == "LeBron James") |  
+  (players['player'] == "Kevin Love") | 
+  (players['player'] == "J.R. Smith")
+][['player', 'PTS_per_G', 'AST']]
+```
+
+The Euclidean distance between LeBron James and JR Smith is 
+```{python}
+np.sqrt((27.5 - 8.3)**2 + (9.1 - 1.8)**2)
+```
+
+The Euclidean distance between LeBron James and Kevin Love is 
+```{python}
+np.sqrt((27.5 - 17.6)**2 + (9.1 - 1.7)**2)
+```
+
+Therefore, LeBron James is more similar to Kevin Love than he is to JR Smith. 
+
+
+### Scaling
+From the figure below, we see that points range from 0 to 30, whereas assists range from 0 to 10. Therefore, points count more toward their "similarity" score than assists. We should normalize our data so that they are equally influential. 
+
+Before we do clustering, we should scale our data. The most convenient way to do this is to scale it so all of the data falls in $[0, 1]$. 
+
+```{python}
+# Scale Data to [0, 1]
+players['PTS_per_G_std'] = players['PTS_per_G'] / players['PTS_per_G'].max()
+players['AST_std'] = players['AST'] / players['AST'].max()
+```
+
+```{python}
+import matplotlib.pyplot as plt
+
+# Left — raw
+fig, axes = plt.subplots(1, 2, figsize=(8, 4))
+axes[0].scatter(players['AST'], players['PTS_per_G'],
+                alpha=0.5, color='blue', s=20)
+axes[0].set_xlabel('AST (raw)')
+axes[0].set_ylabel('PTS_per_G (raw)')
+axes[0].set_title('Raw: PTS dominates the axis range')
+
+# Right — scaled
+axes[1].scatter(players['AST_std'], players['PTS_per_G_std'],
+                alpha=0.5, color='seagreen', s=20)
+axes[1].set_xlabel('AST (scaled 0–1)')
+axes[1].set_ylabel('PTS_per_G (scaled 0–1)')
+axes[1].set_title('Scaled: axes now equal')
+plt.show()
+```
+
+Now, every feature contributes equally to the Euclidean distance, which is exactly what we want.
+
+---
+
+## K-Means Clustering
+![K-Means convergence animation. Source: [Wikimedia                                                                    Commons](https://commons.wikimedia.org/wiki/File:K-means_convergence.gif), CC BY-SA3.0.](https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/K-means_convergence.gif/500px-K-means_convergence.gif)
+
+K-Means is an algorithm for cluster assignment:
+
+1. **Initialize**. Randomly place $K$ centroids.
+2. **Assign**. Each point is assigned to its nearest centroid. 
+3. **Update**. The centroid is updated to be the mean of all points assigned to it.
+4. **Repeat**. Keep alternating steps 2 and 3 until no points switch clusters. 
+
+K-Means can be sensitive to where the centroids start, so we set a seed to get reproducible results. 
+
+### Fitting K-Means
+We fit the clustering algorithm to the data and assign clusters with this code: 
+
+```{python}
+from sklearn.cluster import KMeans
+
+# Fit K-Means Clustering
+kmeans_fit = KMeans(
+  n_clusters=6, 
+  random_state=42 # random seed
+)
+kmeans_fit.fit(players[['PTS_per_G_std', 'AST_std']])
+
+# Assign Labels
+players['cluster_num'] = kmeans_fit.labels_.astype(str)
+```
+
+We can use `matplotlib` to plot the data. However, if we want to have interactive elements, we use the `plotly` library. We can however over each point and see which player it represents: 
+
+```{python}
+import plotly.express as px
+
+# Create Figure
+fig = px.scatter(
+    players, x='AST', y='PTS_per_G',
+    color='cluster_num',
+    hover_name='player',
+    labels={
+      'AST': 'Assists Per Game', 
+      'PTS_per_G': 'Points Per Game'
+    },
+    title='K-Means Clusters (interactive)'
+)
+fig.show()
+```
+
+Looking at the plot, we can begin to reason about what each cluster represents. Clusters in the upper-right have high points *and* high assists. Clusters along the upper edge but shifted left are scorers who don't distribute much. Clusters in the lower-left are bench contributors with limited offensive roles.
+
+### Choosing Number of Clusters: The Elbow Method
+We arbitrarily chose to create 6 clusters. How do we know how many clusters to choose? 
+
+K-Means requires us to specify k upfront. To choose a reasonable value, we fit the model for a range of k values and track the **within-cluster sum of squares (WCSS)**: the total squared distance from every player to their cluster's centroid. Smaller WCSS means tighter, more cohesive clusters.
+
+As k increases, WCSS always decreases. In the extreme case, every player is their own cluster and WCSS is zero. So we're not looking for the minimum; we're looking for the point of **diminishing returns**, where adding another cluster stops meaningfully tightening the groups. This bend in the curve is called the **elbow**.
+
+```{python}
+wcss = []
+k_range = range(1, 11)
+for k in k_range:
+    km = KMeans(n_clusters=k, random_state=42)
+    km.fit(players[['PTS_per_G_std', 'AST_std']])
+    wcss.append(km.inertia_)
+
+fig, ax = plt.subplots(figsize=(7, 4))
+ax.plot(k_range, wcss, marker='o')
+ax.set_xlabel('Number of clusters (k)')
+ax.set_ylabel('Within-Cluster Sum of Squares')
+ax.set_title('Elbow Method for Choosing k')
+plt.show()
+```
+
+The curve bends noticeably around k = 4–6, after which additional clusters provide only marginal improvement. We'll proceed with k = 4. 
+
+### Assigning readable labels
+
+```{python}
+# Fit K-Means Clustering
+kmeans_fit = KMeans(n_clusters=4, random_state=42)
+kmeans_fit.fit(players[['PTS_per_G_std', 'AST_std']])
+players['cluster_num'] = kmeans_fit.labels_.astype(str)
+
+# Create Figure
+fig = px.scatter(
+    players, x='AST', y='PTS_per_G',
+    color='cluster_num',
+    hover_name='player',
+    labels={
+      'AST': 'Assists Per Game', 
+      'PTS_per_G': 'Points Per Game'
+    },
+    title='K-Means Clusters (interactive)'
+)
+fig.show()
+```
+
+### Interpreting the Archetypes
+
+With 4 clusters, it's a lot easier to interpret. The algorithm seems to classify the players as 
+
+1. **Superstars**: High scoring, high assists.  
+2. **High scoring**, low assists.   
+3. **Low scoring**, high assists.   
+4. **Bench-Players**: Low scoring, low assists.  
+
+Increasing the number of clusters makes the groups more specific and descriptive, but at the cost of lack of interpretability. 
+
+--- 
+
+## In-Class Activity
+
+### Part 1: Adding a Defensive Dimension
+
+So far we have only used two offensive statistics — `PTS_per_G` and `AST`. What happens when we bring in a defensive statistic?
+
+**Questions**
+
+1. **Add total rebounds (`TRB`).** Refit K-Means on all three variables: `PTS_per_G`, `AST`, and `TRB` (remember to scale all three). Use $k = 6$. How do the cluster assignments change compared to the two-variable model?
+
+2. **Interpret the new clusters.** Do the archetypes shift? Are there new groupings that the two-variable model could not detect? Name and describe each cluster.
+
+3. **Reflection.** What are the trade-offs of adding more variables? Why is visualization harder with three features than with two?
+
+---
+
+### Part 2: Clustering in Your Sport
+
+Pick a sport you're interested in and find a player statistics dataset for it. Choose two performance statistics to cluster on.
+
+**Questions**
+
+4. **Choose a sport and statistics.** What sport did you pick? Which two statistics will you cluster on, and why are they interesting?
+
+I chose college basketball because it's super relevant right now with March Madness. I chose the Big 12 conference from last season. I will cluster on PTS and MP (mins played) because these are two variables that could correspond to one another and I'm curious how many more mins played better players get. 
+
+5. **Create an elbow plot.** Fit K-Means for $k = 1$ through $10$ and plot WCSS vs. $k$. Where does the elbow appear? How many clusters did you choose? The elbow appears around 4, so I chose 4 clusters. 
+
+```{python}
+import pandas as pd
+import numpy as np
+
+# Load Data
+players_cbb = pd.read_csv("data/College_BB_Player.csv")
+
+# Focus on These Columns
+cols_pg = ["Player", "G", "GS", "MP", "FG", "3P", "2P",
+           "FT", "TRB", "AST", "STL", "BLK", "TOV", "PTS", "Team"]
+players_cbb_clean = players_cbb.dropna()
+players = players_cbb_clean[cols_pg]
+
+```
+
+```{python}
+players[
+  (players['Player'] == "Keyshawn Hall") |  
+  (players['Player'] == "Javon Small") | 
+  (players['Player'] == "JT Toppin") |
+  (players['Player'] == "Caleb Love") 
+][['Player', 'PTS', 'MP']]
+```
+
+
+
+```{python}
+wcss = []
+k_range = range(1, 11)
+for k in k_range:
+    km = KMeans(n_clusters=k, random_state=42)
+    km.fit(players[['PTS', 'MP']])
+    wcss.append(km.inertia_)
+
+fig, ax = plt.subplots(figsize=(7, 4))
+ax.plot(k_range, wcss, marker='o')
+ax.set_xlabel('Number of clusters (k)')
+ax.set_ylabel('Within-Cluster Sum of Squares')
+ax.set_title('Elbow Method for Choosing k')
+plt.show()
+```
+
+
+
+6. **Fit K-Means and plot the clusters.** Use your chosen $k$ and display the result on a scatter plot, coloring each cluster differently.
+
+
+```{python}
+kmeans_fit = KMeans(n_clusters=4, random_state=42)
+kmeans_fit.fit(players[['PTS', 'MP']])
+players['cluster_num'] = kmeans_fit.labels_.astype(str)
+import plotly.express as px
+
+# Create Figure
+fig = px.scatter(
+    players, x='MP', y='PTS',
+    color='cluster_num',
+    hover_name='Player',
+    labels={
+      'MP': 'Minutes Playes', 
+      'PTS': 'Points Scored'
+    },
+    title='K-Means Clusters (interactive)'
+)
+fig.show()
+```
+
+7. **Describe each cluster.** Give each cluster a meaningful name and describe what kind of player belongs there. Name at least 2–3 players per cluster as evidence.
+
+Top Players: favorited players with lots of playing time who score the most points (Caleb Love, Keyshawn Hall, Javon Small)
+Good Players: players who play a fair amount, but not all the time, and score points (Ezra Ausar, Jalen Celestine, KJ Lewis)
+Middle Players: Players who don't play as much, but still score (Trevin Knell, Carter Bryant, Mason Madsen)
+Low Players: Low level players who rarely play or score (Kirk Cole, Jack Pease, Addison Arnold)
+
+8. **Shrink the clusters.** Refit with $k - 1$ (one fewer cluster than you chose). What changes? Are any of your archetypes merged together? Does the result still make sense?
+
+```{python}
+kmeans_fit = KMeans(n_clusters=3, random_state=42)
+kmeans_fit.fit(players[['PTS', 'MP']])
+players['cluster_num'] = kmeans_fit.labels_.astype(str)
+import plotly.express as px
+
+# Create Figure
+fig = px.scatter(
+    players, x='MP', y='PTS',
+    color='cluster_num',
+    hover_name='Player',
+    labels={
+      'MP': 'Minutes Playes', 
+      'PTS': 'Points Scored'
+    },
+    title='K-Means Clusters (interactive)'
+)
+fig.show()
+```
+
+This could work, but it seems to broad for all these players. It merges together some of the good players and the top players. It could make sense, but I think we need one more cluster for better understanding of the data. 

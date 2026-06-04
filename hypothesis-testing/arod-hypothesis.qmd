@@ -1,0 +1,337 @@
+---
+title: "ARod Hypothesis Test"
+author: "Dr. Ekstrom"
+format:
+  html: default
+  pdf: default
+fontsize: 11pt
+---
+
+**Purpose:** Did Alex Rodriguez shrink under the pressure of the post-season? Or is he the victim of a small sample size? In this activity, we explore ARod's post-season struggles.
+
+- **Sports Analytics:** Test a claim regarding "clutch performance."
+- **Statistics:** Hypothesis testing using a simulation.
+- **Python:** Simulating with `numpy` and `pandas`.
+
+---
+
+## The Idea of a Hypothesis Test
+
+Imagine you are playing a dice game with the shady character Dr. X. You notice that when Dr. X rolls his die, the number six seems to appear too often. In fact, you record that the number six has appeared in 12 of his 20 rolls. You start to suspect that Dr. X isn't using a fair die. However, he won't let you inspect the die, so all you have to go on is your observations.
+
+**Is seeing a six in 12 out of 20 rolls enough evidence to conclude the die is unfair?**
+
+Let us *assume* Dr. X is using a fair die. What is the probability of seeing something this extreme, at least 12 sixes in 20 rolls, just by chance?
+
+We will answer this by simulating 200,000 experiments of 20 rolls each.
+
+```{python}
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+np.random.seed(42)
+
+# One experiment: roll a fair die 20 times, count the sixes
+rolls = np.random.choice([1, 2, 3, 4, 5, 6], size=20, replace=True)
+print(f"Number of sixes in 20 rolls: {np.sum(rolls == 6)}")
+```
+
+Now we run 200,000 experiments and count how often we see 12 or more sixes:
+
+```{python}
+# Simulate 200,000 experiments of 20 rolls
+ns = 200_000
+simres = np.random.binomial(n=20, p=1/6, size=ns)
+
+# What fraction of experiments produced 12 or more sixes?
+p_value = np.mean(simres >= 12)
+print(f"P(six appears 12+ times in 20 rolls | fair die) = {p_value:.4f}")
+```
+
+```{python}
+# Visualize the distribution
+plt.figure(figsize=(8, 4))
+plt.hist(simres, bins=range(0, 16), align='left', edgecolor='black',
+         color='steelblue', density=True)
+plt.axvline(12, color='red', linestyle='--', label='Observed: 12 sixes')
+plt.xlabel("Number of Sixes in 20 Rolls")
+plt.ylabel("Proportion of Simulations")
+plt.title("Simulated Distribution Under Fair Die Assumption")
+plt.legend()
+plt.show()
+```
+
+We see that if Dr. X is using a fair die, seeing 12 or more sixes in 20 rolls is extremely unlikely. We conclude Dr. X is *probably* cheating.
+
+Note: we cannot be *certain*. He could be using a fair die and we observed something truly remarkable (like winning the lottery). But it is so unlikely that we are willing to live with the small chance our conclusion is wrong.
+
+**This reasoning is the heart of a hypothesis test.**
+
+---
+
+## Setting Up the ARod Hypothesis Test
+
+The first step is to state our hypotheses clearly. In general:
+
+- The **null hypothesis (H₀)** is that there is *no* difference, the status quo.
+- The **alternate hypothesis (Hₐ)** says there *is* a difference, and we specify the direction.
+
+For ARod:
+
+- **H₀:** Alex Rodriguez's post-season performance is not significantly different from his regular season performance.
+- **Hₐ:** Alex Rodriguez's post-season performance is significantly *lower* than his regular season performance.
+
+The second step is to choose a **significance level** (α). We will use **5%**, though 1% or 10% are also common choices. It is important to fix this *before* running the analysis.
+
+---
+
+## Loading and Examining the Data
+
+```{python}
+z = pd.read_csv("data/Alex Rodriguez hypoth.csv")
+print(z.to_string())
+```
+
+The data has three rows: his **Regular** season totals, **Post**-season totals, and **Total** (career) combined.
+
+---
+
+## Choosing a Metric: OPS
+
+We will use **OPS** (On-base Plus Slugging) to evaluate ARod's performance. OPS is a widely adopted metric in baseball analytics that captures both a player's ability to get on base and to hit for power.
+
+$$\text{OBP} = \frac{H + BB + HBP}{AB + BB + HBP + SF}$$
+
+$$\text{SLG} = \frac{1B + 2 \cdot 2B + 3 \cdot 3B + 4 \cdot HR}{AB}$$
+
+$$\text{OPS} = \text{OBP} + \text{SLG}$$
+
+```{python}
+OBP = (z['H'] + z['BB'] + z['HBP']) / (z['AB'] + z['BB'] + z['HBP'] + z['SF'])
+SLG = (z['1B'] + 2*z['2B'] + 3*z['3B'] + 4*z['HR']) / z['AB']
+OPS = OBP + SLG
+
+# Row 2 (index 2) is 'Total' i.e. career OPS
+# Row 1 (index 1) is 'Post' i.e. post-season OPS
+print(f"Career OPS:      {OPS[2]:.4f}")
+print(f"Post-season OPS: {OPS[1]:.4f}")
+```
+
+ARod's career OPS is **0.9271** including both regular and post-seasons. We will test whether his post-season OPS of **0.8216** is significantly lower than 0.9271.
+
+Our hypotheses become:
+
+- **H₀:** OPS_Post = 0.927
+- **Hₐ:** OPS_Post < 0.927
+
+**An important question:** Why compare his post-season OPS to his *career* OPS rather than his regular-season OPS?
+
+Because we are assuming the null hypothesis is true, that his post-season plate appearances are just another random sample from his career. Under H₀, all of his plate appearances (regular and post-season) are drawn from the same underlying ability.
+
+---
+
+## Creating a Simulation
+
+ARod clearly had a lower OPS in the post-season. But he had very few post-season at-bats compared to his regular season total. OPS fluctuates naturally in small samples, perhaps his low post-season OPS was just bad luck.
+
+To find out, we simulate what a 326-plate-appearance post-season *might* look like for a player with ARod's career statistics.
+
+First, we compute some derived quantities:
+
+```{python}
+# APA: adjusted plate appearances (AB + BB + HBP excludes sacrifice flies/bunts)
+APA = z['AB'] + z['BB'] + z['HBP']
+
+# Outs: non-sacrifice outs
+Outs = z['AB'] - z['1B'] - z['2B'] - z['3B'] - z['HR']
+
+print(f"Career APAs: {APA[2]}")
+print(f"Post-season APAs: {APA[1]}  ← we'll simulate this many PAs")
+```
+
+We simplify by ignoring sacrifice flies and bunts (ARod had very few, so this has minimal impact). Each plate appearance results in one of six outcomes:
+
+| Code | Outcome           |
+|------|-------------------|
+| 1    | Single            |
+| 2    | Double            |
+| 3    | Triple            |
+| 4    | Home Run          |
+| 5    | Walk or HBP       |
+| 6    | Out               |
+
+We use ARod's **career** (Total row, index 2) statistics to set the probabilities:
+
+```{python}
+# Outcome probabilities based on career totals
+pr = np.array([
+    z['1B'][2]  / APA[2],              # single
+    z['2B'][2]  / APA[2],              # double
+    z['3B'][2]  / APA[2],              # triple
+    z['HR'][2]  / APA[2],              # home run
+    (z['BB'][2] + z['HBP'][2]) / APA[2],  # walk or HBP
+    Outs[2]     / APA[2],              # out
+])
+
+outcomes = ['Single', 'Double', 'Triple', 'HR', 'Walk/HBP', 'Out']
+for name, p in zip(outcomes, pr):
+    print(f"  {name:10s}: {p:.4f}")
+print(f"  Sum: {pr.sum():.4f}")
+```
+
+Now we simulate one post-season of 326 adjusted plate appearances:
+
+```{python}
+np.random.seed(42)
+sim = np.random.choice([1, 2, 3, 4, 5, 6], size=326, p=pr, replace=True)
+
+# Count outcomes: index 0=singles, 1=doubles, 2=triples, 3=HRs, 4=walks/HBP, 5=outs
+counts = np.bincount(sim, minlength=7)[1:]  # drop index 0 (unused)
+
+# Compute simulated OPS
+# OBP: (1B + 2B + 3B + HR + Walk/HBP) / total APAs
+sim_obp = (counts[0] + counts[1] + counts[2] + counts[3] + counts[4]) / 326
+# SLG: (1B + 2*2B + 3*3B + 4*HR) / ABs  (ABs = APAs - walks/HBP)
+sim_ab  = counts[0] + counts[1] + counts[2] + counts[3] + counts[5]
+sim_slg = (counts[0] + 2*counts[1] + 3*counts[2] + 4*counts[3]) / sim_ab
+sim_ops = sim_obp + sim_slg
+
+print(f"Simulated OBP: {sim_obp:.4f}")
+print(f"Simulated SLG: {sim_slg:.4f}")
+print(f"Simulated OPS: {sim_ops:.4f}")
+```
+
+Every time we run this we get different numbers. We need to run it many times to get a sense of how often a player with ARod's ability would produce an OPS as low as 0.8216.
+
+---
+
+## Running the Full Simulation
+
+```{python}
+np.random.seed(42)
+n = 20_000
+pops = np.zeros(n)
+
+for j in range(n):
+    # Simulate 326 plate appearances using career probabilities
+    sim = np.random.choice([1, 2, 3, 4, 5, 6], size=326, p=pr, replace=True)
+    counts = np.bincount(sim, minlength=7)[1:]
+
+    # Compute OPS for this simulated post-season
+    sim_obp = (counts[0] + counts[1] + counts[2] + counts[3] + counts[4]) / 326
+    sim_ab  = counts[0] + counts[1] + counts[2] + counts[3] + counts[5]
+    sim_slg = (counts[0] + 2*counts[1] + 3*counts[2] + 4*counts[3]) / sim_ab
+    pops[j] = sim_obp + sim_slg
+
+# ARod's actual post-season OPS
+post_ops = OPS[1]
+
+# p-value: fraction of simulations with OPS at least as low as observed
+p_val = np.mean(pops <= post_ops)
+print(f"ARod's actual post-season OPS: {post_ops:.4f}")
+print(f"P-value: {p_val:.4f}")
+```
+
+```{python}
+# Visualize the simulated distribution
+plt.figure(figsize=(8, 4))
+plt.hist(pops, bins=50, edgecolor='black', color='steelblue', density=True)
+plt.axvline(post_ops, color='red', linestyle='--', linewidth=2,
+            label=f"ARod Post-season OPS = {post_ops:.4f}")
+plt.xlabel("Simulated OPS (326 plate appearances)")
+plt.ylabel("Density")
+plt.title("Distribution of Simulated Post-Season OPS\n(Assuming Career Rates, n = 20,000)")
+plt.legend()
+plt.show()
+```
+
+---
+
+## Interpreting the Results
+
+We simulated 20,000 possible post-seasons of 326 plate appearances, each drawn from ARod's career statistics. The p-value tells us: **what fraction of those simulations produced an OPS as low as ARod's actual post-season OPS?**
+
+Since we chose a significance level of **α = 5%**, we compare our p-value to 0.05:
+
+- If **p-value < 0.05**: reject H₀ ARod's post-season performance is significantly worse.
+- If **p-value ≥ 0.05**: fail to reject H₀ the difference could plausibly be due to chance.
+
+Based on this simulation, we **do not have enough evidence** to conclude that ARod's post-season performance was significantly worse than his regular season performance. The lower OPS in the post-season is consistent with the natural variation expected in a sample of only 326 plate appearances.
+
+Or, in the language of statistics: the difference between ARod's post-season and regular season OPS was **not statistically significant** at the 5% level.
+
+---
+
+## Further Considerations
+
+This simulation only considered ARod's offensive production and made a few simplifying assumptions (ignoring sacrifice flies/bunts). It also does not account for the fact that ARod likely faced better pitching in the post-season. A more complete simulation incorporating these factors might change our results and our conclusion.
+
+---
+
+## Group Activity
+
+Run a similar hypothesis test for an athlete of your choosing. How does LeBron James' performance in the NBA playoffs compare to the regular season? What about James Harden? Tom Brady? Derek Jeter?
+
+**Steps to follow:**
+
+1. Pick an athlete and a sport.
+2. Find data for their regular season and post-season performance. (Sites like [Baseball Reference](https://www.baseball-reference.com), [Basketball Reference](https://www.basketball-reference.com), and [Pro Football Reference](https://www.pro-football-reference.com) have extensive player data.)
+3. Determine a metric to measure performance (e.g., OPS, PER, passer rating, etc.).
+4. State your null and alternate hypotheses.
+5. Choose a significance level α.
+6. Create a simulation to determine the probability of observing a result as extreme as the one you observed.
+7. Reach an appropriate conclusion.
+
+Submit your Quarto notebook (`.qmd`) and data.
+
+
+
+```{python}
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+mookie = pd.read_csv("data/Mookie_Data.csv")
+print(mookie.to_string())
+```
+
+We will use **OPS** (On-base Plus Slugging) to evaluate Mookie's performance. OPS is a widely adopted metric in baseball analytics that captures both a player's ability to get on base and to hit for power.
+
+$$\text{OBP} = \frac{H + BB + HBP}{AB + BB + HBP + SF}$$
+
+$$\text{SLG} = \frac{1B + 2 \cdot 2B + 3 \cdot 3B + 4 \cdot HR}{AB}$$
+
+$$\text{OPS} = \text{OBP} + \text{SLG}$$
+
+```{python}
+OBP = (mookie['H'] + mookie['BB'] + mookie['HBP']) / (mookie['AB'] + mookie['BB'] + mookie['HBP'] + mookie['SF'])
+SLG = (2*mookie['2B'] + 3*mookie['3B'] + 4*mookie['HR']) / mookie['AB']
+OPS = OBP + SLG
+
+# Row 2 (index 2) is 'Total' i.e. career OPS
+# Row 1 (index 1) is 'Post' i.e. post-season OPS
+print(f"Career OPS:      {OPS[2]:.4f}")
+print(f"Post-season OPS: {OPS[1]:.4f}")
+```
+
+Mookie's career OPS is **0.6949** including both regular and post-seasons. We will test whether his post-season OPS of **0.6425** is lower than 0.6949.
+
+Our hypotheses become:
+
+H₀: Mookie Betts's post-season performance is not significantly different from his regular season performance.
+Hₐ: Mookie Betts's post-season performance is lower than his regular season performance.
+
+We will use a significance level of α = 5%.
+
+
+```{python}
+mookie['1B'] = mookie['H'] - mookie['2B'] - mookie['3B'] - mookie['HR']
+
+APA = mookie['AB'] + mookie['BB'] + mookie['HBP']
+
+# Outs: non-sacrifice outs
+Outs = mookie['AB'] - mookie['1B'] - mookie['2B'] - mookie['3B'] - mookie['HR']
+
+print(f"Career APAs: {APA[2]}")
+print(f"Post-season APAs: {APA[1]}  ← we'll simulate this many PAs")
+```

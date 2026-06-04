@@ -1,0 +1,353 @@
+---
+title: "Data Wrangling"
+author: Jeff Mei
+format:
+  html: default
+  pdf: default
+fontsize: 11pt
+---
+
+**Reference**: [Pandas Cheatsheet](https://pandas.pydata.org/Pandas_Cheat_Sheet.pdf)
+
+## Introduction
+A large fraction of time doing data science is doing data cleaning. Most of our analytical tools (e.g. regression) require that the data be in a tabular (tidy) format.   
+- Rows = observations  
+- Columns = variables  
+- Each row should represent one unit of analysis
+
+For this lecture, we will start with this toy dataset:
+
+```{python}
+import pandas as pd
+
+games = pd.DataFrame({
+    "game_id": [1, 2, 3, 4, 5],
+    "home_team": ["Lakers", "Celtics", "Heat", "Bulls", "Clippers"],
+    "away_team": ["Bulls", "Heat", "Lakers", "Clippers", "Lakers"],
+    "home_points": [115, 108, 104, 120, 99],
+    "away_points": [110, 112, 109, 102, 105]
+})
+games
+
+```
+
+**Referencing Columns.** It is standard convention in computer programming to use brackets `[...]` to refer to indices. It is no different in Python. Since data frames often have named columns, we can refer them by the column name instead of the index. 
+
+To select a **single column**, we can call it by the column name
+
+```{python}
+games["home_team"]
+```
+
+To subset **multiple columns**, we use a _list_ of column names to call them
+
+```{python}
+games[["home_team", "home_points"]]
+```
+
+**Filtering**. We often need to take a narrower view of our data. 
+
+```{python}
+# Find All Lakers Games
+lakers_home = (games["home_team"] == "Lakers")
+lakers_away = (games["away_team"] == "Lakers")
+games[lakers_home | lakers_away]
+```
+
+**New Columns**. To conduct a deeper analysis, we need to create new columns. This is useful to create new statistics. 
+
+```{python}
+# Calculate how much the home team wins by
+games["point_diff"] = games["home_points"] - games["away_points"]
+games
+```
+
+```{python}
+# Identify the Winner 
+games["winner"] = games["home_team"].where(
+  # if "home_points" > "away_points", then output "home_team"
+  games["home_points"] > games["away_points"], 
+
+  # else "away_team"
+  games["away_team"]
+)
+games
+```
+
+**Overwriting Data**. The data we have may be flawed and we must fix it ourselves. If we webscraped the data, then there might be some unwanted artifacts. Perhaps some of the data is simply wrong. In any case, we can use `iloc` and `loc` to identify the rows and columns. 
+
+If you know the exact index, you may use `iloc` to specify what element of the data frame you want to change.
+
+```{python}
+# Change the first 3 game_id value from 1 to 10
+games.iloc[0:3, 0] = 10
+games["game_id"]
+```
+
+This can be cumbersome if you don't know the exact index. More often, we will use `loc`, which identifies elements by labels. 
+
+```{python}
+# Change the game_id back to its original value
+games.loc[0:3, "game_id"] = [1, 2, 3, 4]
+games["game_id"]
+```
+
+You can also select multiple rows: 
+
+```{python}
+# Goal: Change "Lakers" to "LA Lakers"
+lakers_home = (games["home_team"] == "Lakers")
+lakers_away = (games["away_team"] == "Lakers")
+
+# Overwrite 
+games.loc[lakers_home, "home_team"] = "LA Lakers"
+games.loc[lakers_away, "away_team"] = "LA Lakers"
+games
+```
+
+Note: you might get a warning if you use two subsetting operations (e.g. `df[cols].iloc[row]`). This is because the first operation `df[cols]` creates a _copy_, so `.iloc[row]` is not operating by reference. 
+
+
+**Handling NA Values**. Real data is rife with missing data. There are many ways to deal with them. The simplest is to remove them entirely
+
+```{python}
+# Create NA Value at rows 1 and 4 at the column "home_points"
+games.loc[[0, 3], "home_points"] = None
+
+# drop all rows with NA values
+games.dropna()
+```
+
+Other times, you might want to replace the missing values with a default value. 
+
+```{python}
+# replace NA with 0
+games.fillna(0)
+```
+
+
+
+---
+
+We introduce our second dataset now. It has player data for each of the games. The `player_id` is the jersey number of the player. This number is unique on a team, but is not unique across all teams. 
+
+```{python}
+player_games = pd.DataFrame({
+    "game_id":   [1, 1, 2, 2, 3, 3, 4, 4, 5, 5],
+    "player_id": [23, 7, 0, 22, 23, 22, 7, 13, 23, 13],
+    "team":      ["Lakers", "Bulls", "Celtics", "Heat", "Lakers", "Heat", "Bulls", "Clippers", "Lakers", "Clippers"],
+    "points":    [28, 19, 31, 24, 27, 22, 26, 21, 30, 18],
+    "rebounds":  [8,  5,  9,  7,  7,  6,  4,  6,  9,  5],
+    "assists":   [7,  3,  5,  6,  8,  5,  4,  4,  6,  3],
+    "minutes":   [36, 33, 38, 35, 37, 34, 32, 34, 39, 31]
+})
+player_games
+```
+
+**Sorting**. You can see who has the most rebounds by sorting the data by the `rebounds` column. By default, it sorts the data in ascending order, so you have to set `ascending=False` to get the data in descending order. 
+
+```{python}
+player_games.sort_values("rebounds", ascending=False)
+```
+
+**Method Chaining.** Data cleaning can be a long and tedious process. You will often have to do many operations on the data. Instead of overwriting the data frame every time, you can apply _method chaining_. 
+
+Beginners are tempted to create multiple data frames for each step of their data wrangling: 
+
+```{python}
+# select player-games with more than 25 points
+df1 = player_games.loc[player_games["points"] > 25]
+# sort the data by number of minutes played
+df2 = df1.sort_values("minutes", ascending=False)
+# only show a few columns
+df3 = df2[["player_id", "points", "minutes"]]
+```
+
+Alternatively, you can use _method chaining_. Instead of creating a new variable at each step of the data wrangling process, you feed the output of one step as the input of the next step. 
+```{python}
+(
+  player_games 
+  # select player-games with more than 25 points
+  .loc[player_games["points"] > 25] 
+  # sort the data by number of minutes played
+  .sort_values("minutes", ascending=False)
+  # only show a few columns
+  [["player_id", "points", "minutes"]]
+)
+```
+
+
+**Grouping**. Split-Apply. You begin by splitting the data into groups. Then, you _apply_ a function to each group. This is especially useful for making data summaries. You might want to get a summary statistic for each team 
+
+```{python}
+# Total Points Scored
+(
+  player_games.groupby("team") # split - by team
+  ["points"].sum()             # apply - sum on points
+)
+```
+
+If you want to get multiple summary statistics 
+```{python}
+player_games.groupby("team").agg({
+    "points": "sum",
+    "rebounds": "mean"
+})
+```
+
+
+**Joining Datasets**.
+
+```{python}
+players = pd.DataFrame({
+    "player_id": [23, 0, 22, 7, 13, 2],
+    "player": ["LeBron James", "Jayson Tatum", "Jimmy Butler", "Zach LaVine", "Paul George", "Kawhi Leonard"],
+    "team": ["Lakers", "Celtics", "Heat", "Bulls", "Clippers", "Clippers"],
+    "position": ["F", "F", "F", "G", "F", "F"]
+})
+```
+
+```{python}
+pg_merged = player_games.merge(
+    games.reset_index(),
+    on="game_id",
+    how="left"
+)
+pg_merged = pg_merged.merge(
+    players[["player_id", "player"]],
+    on="player_id",
+    how="left"
+)
+
+player_games.merge(
+    players[["player_id", "player"]],
+    on="player_id",
+    how="left"
+)
+```
+
+
+---
+
+## In-Class Exercise
+We will practice data wrangling on football data. 
+
+```{python}
+# Read Data
+qb = pd.read_csv("data/nfl_qbs.csv")
+qb.columns
+```
+Complete these exercises and push your results by the end of the class.
+
+1. Show first 10 rows  
+```{python}
+qb.head(10)
+```
+
+
+2. Select the first 10 rows of the `Player`, `Yds`, and `TD` columns.   
+
+```{python}
+selectcols = qb[["Player", "Yds", "TD"]]
+selectcols.head(10)
+```
+
+3. Identify the top 5 quarterbacks by `Yds` (hint: use `sort_values`). Identify the bottom 5 quarterbacks.  
+
+```{python}
+selectcols.sort_values('Yds', ascending=False)
+# Top 5 QBs are Jameis Winston, Dak Prescott, Jared Goff, Philip Rivers, and Matt Ryan
+
+# Bottom 5 QBs are Cooper Rush, Nick Mullens, Trace McSorley, David Fales, and Garrett Gilbert all with 0
+```
+
+
+
+4. Find all players who got at least 20 touchdowns (`TD`). Find the top 20% of players with the most yards (`Yds`) (hint: use the `.quantile` function in `pandas`). 
+
+```{python}
+twenty_td = qb[qb['TD'] >= 20] # players who have at least 20 touchdowns
+
+top_20 = qb['Yds'].quantile(0.80) # top 20% quantile of the yards threshold
+top_yds = qb[qb['Yds'] >= top_20] # all players above the threshold
+
+top_yds = top_yds.sort_values('Yds', ascending=False) # seeing who has the highest
+
+top_yds # This is the top 20 percent of players with the most yards
+```
+
+5. How many quarterbacks have over 4000 yards?
+
+```{python}
+fourthousyds = qb[qb['Yds'] >= 4000]
+fourthousyds
+
+# 11 quarterbacks have over 4000 yards
+```
+
+6. Create a new statistic for completion percentage. This is the ratio of completions (`Cmp`) to attempts (`Att`). Remove all NA values. 
+
+```{python}
+qb['Comp%'] = qb['Cmp']/qb['Att']
+qb = qb.dropna()
+```
+
+7. The data contains the number of wins (`W`), the number of losses (`L`), and the number of ties (`T`). Create a new column for `TotalGames` -- the total number of games played.
+
+```{python}
+qb['TotalGames'] = qb['W'] + qb['L'] + qb['T']
+qb
+```
+
+8. What `Age` has the highest average of touchdowns (`TD`)? How about the highest average yards (`Yds`)? 
+
+```{python}
+age_highest_td = qb.groupby('Age')['TD'].mean()
+age_highest_td.sort_values(ascending=False)
+# Age 31 has highest avg of touchdowns
+```
+
+```{python}
+age_highest_yd = qb.groupby('Age')['Yds'].mean()
+age_highest_yd.sort_values(ascending=False)
+# Age 25 has highest avg of yards
+```
+
+9. Create 5 additional questions. State them and do the necessary data wrangling to solve them. For example   
+- Do older QBs take more sacks (`Sk`)? 
+```{python}
+correlation = qb['Age'].corr(qb['Sk'])
+correlation
+# since correlation is negative, older people take less sacks 
+```
+
+- What team threw the most interceptions (`Int`)?  
+```{python}
+most_int_team = qb.groupby('Tm')['Int'].max().sort_values(ascending=False)
+most_int_team
+# TAM
+```
+
+- What player has the most wins?
+```{python}
+most_wins_player = qb.groupby('Player')['W'].max().sort_values(ascending=False)
+most_wins_player
+# Jimmy Garoppolo
+```
+
+- What league has the most yards?
+```{python}
+most_yds_league = qb.groupby('Lg')['Yds'].max().sort_values(ascending=False)
+most_yds_league
+# NFL
+```
+
+-  Which draft's players have the most wins?
+```{python}
+most_wins_draft = qb.groupby('Draft')['W'].max().sort_values(ascending=False)
+most_wins_draft
+# Feb - 62
+```
+
+
+

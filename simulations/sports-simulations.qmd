@@ -1,0 +1,409 @@
+---
+title: "Simulations"
+author: Jeff Mei
+format:
+  html: default
+  pdf: default
+fontsize: 11pt
+---
+
+## Introduction
+Randomness is an intrinsic part of sports. Many specific events can be modeled like coin-flips: a basketball free throw is made about 75% of the time, and a baseball hitter gets a hit roughly 25% of the time. But sports aren't exciting because we like watching coin flips. They're exciting because those probabilities unfold within a sophisticated game of strategy and skill.
+
+**Simulating Strategies.** Simulation allows us to encode rules directly and let the computer generate outcomes repeatedly. Instead of solving equations, we ask: what happens if we play the game thousands of times? This makes simulation especially useful for evaluating strategies, comparing scenarios, and understanding variability. For example, we can test whether a slightly better home-run rate meaningfully improves a team’s chance of winning a series.
+
+Simulations are one of the most versatile methods in the data science toolbox. They allow us to explore questions that are analytically difficult, quantify uncertainty, and experiment with “what-if” scenarios before they happen in the real world.They may be as simple or as complex as you would like. 
+
+**Why not regression?** Regression is a powerful tool for understanding relationships between variables and making predictions, but it relies on assumptions and analytic formulas. When systems become complex, writing down a clean regression model can be difficult or even impossible. Regression also typically answers questions about average relationships, while many real-world questions involve distributions, uncertainty, and rare events (for example, the chance a weaker team wins a game).
+
+
+## Simulation Basics
+
+This section is a mini-tutorial on the core functions used throughout the simulations below.
+
+### Core Random/Sampling Functions
+
+- `np.random.seed(seed)`: sets the random seed so your simulation results are reproducible.
+- `np.random.binomial(n, p, size)`: simulates binary outcomes. For a yes/no event (like home run vs out), use `n=1`.
+- `np.empty(N, dtype=int)`: pre-allocates an array to store simulation outputs efficiently.
+
+**Basic random number generation.** We use the `numpy` package to draw random numbers. Specifically, we use the `np.random.binomial` function to generate random binary values, taking values 0 or 1. 
+
+```{python}
+import numpy as np
+
+# To make a sequence, use the `size` parameter
+np.random.binomial(n=1, p=0.5, size=5)
+  # 0: 50% 
+  # 1: 50% 
+```
+
+**Reproducible random number generation**. With a fixed seed, the same code produces the same simulated outcomes each time, so you can isolate the effect of code changes rather than randomness. Without a seed, outputs can vary from run to run, which makes it harder to tell whether differences are meaningful or just random noise.
+
+In the following example, we set an arbitrary seed and show we obtain the same sequence of random numbers each time. 
+
+```{python}
+np.random.seed(123)  # set seed 
+draws_1 = np.random.binomial(n=1, p=0.5, size=5)
+
+np.random.seed(123)  # set same seed again
+draws_2 = np.random.binomial(n=1, p=0.5, size=5)
+
+# the random sequence is the same
+"Same result" if np.array_equal(draws_1, draws_2) else "Different Result"
+```
+
+--- 
+
+## Baseball Simulation
+
+### Overview
+
+We will use a highly simplified version of baseball:
+
+- Every at-bat has only two outcomes: home run or strikeout.  
+- A home run scores exactly one run.  
+- An inning continues until three outs occur.  
+
+This simplification lets us isolate the core idea of simulation: repeatedly sampling random outcomes according to specified probabilities and tracking the resulting totals.
+
+Rather than solving for the expected number of runs using probability formulas, we can mimic the game directly. The computer repeatedly “plays” innings by randomly generating at-bat outcomes according to a specified probability of a home run. By repeating this process many times, we approximate quantities such as:  
+
+- expected runs per inning  
+- expected runs per game  
+- probability one team beats another  
+- variability in scores  
+
+This approach reflects an important idea in simulation: if we can describe the mechanism that generates outcomes, we can estimate almost any quantity of interest by repeated sampling.
+
+
+## Simulating a Single Inning
+We consider a simplified game of baseball in which each at-bat has only two possible outcomes: a home run or a strikeout. This turns an inning into a sequence of repeated random trials that continues until three outs occur. Below is a flow chart for the logic of our simplified inning: 
+
+::: {style="max-width: 420px; margin: 0 auto;"}
+  ```{mermaid}
+  flowchart TD
+      A[Start inning] --> C{Fewer than 3 outs?}
+      C -- No --> H[End Inning]
+      C -- Yes --> D[Simulate At Bat]
+      D -- 1: Homerun --> F[Add 1 to runs]
+      D -- 0: Strikeout --> G[Add 1 to outs]
+      F --> C
+      G --> C
+  ```
+:::
+
+
+### At-Bat Simulation
+In our simplified setting, a batter is up to bat, and they either strike out, or hit a home run. We use the `np.random.binomial` function to simulate the random outcome: 
+
+This section models a single plate appearance as a simple random trial. We collapse all outcomes into either a home run (run scored) or a strikeout (out recorded), which keeps the logic clear while still capturing the core randomness of hitting.
+
+```{python}
+# =================
+# Simulate "At Bat"
+# =================
+
+# 0 = strikeout, 1 = homerun with probability p = 0.1
+p = 0.1 # prob of home run
+at_bat = np.random.binomial(n=1, p=p)
+print("HOMERUN" if at_bat == 1 else "STRIKEOUT")
+```
+
+
+### Simulating Inning
+Now we extend the at‑bat model across a full inning. We repeatedly simulate plate appearances and update runs and outs until three outs are recorded, which mirrors how innings actually end in baseball. This sets up a clean, loop‑based framework that we can later enrich with more realistic outcomes.
+
+```{python}
+# ===============
+# Simulate Inning
+# ===============
+np.random.seed(321) # set seed
+runs = 0
+outs = 0
+while outs < 3: # inning ends when there are three outs
+    at_bat = np.random.binomial(n=1, p=p)
+    if at_bat == 1: # home run
+        runs += 1
+        print(f"HOMERUN   (Runs: {runs})")
+    else: # strike out
+        outs += 1
+        print(f"STRIKEOUT (Outs: {outs}/3)")
+```
+
+## Simulating Many Innings
+Simulating a single inning is not very informative because any one outcome is dominated by randomness. By simulating many innings, we can see the full distribution of possible run totals and get stable estimates of typical performance. 
+
+The number of simulations is a tradeoff: more simulations reduce Monte Carlo noise and make the results smoother, but they take longer to run and offer diminishing returns once the estimates have mostly stabilized.
+
+
+```{python}
+# Set Simulation Parameters
+np.random.seed(321) # set seed
+num_sims = 1000   # number of simulations
+
+# =====================
+# Simulate Many Innings
+# =====================
+inning_runs = np.empty(num_sims, dtype=int) 
+  # initialize empty vector
+for i in range(num_sims):
+
+    # Simulate Inning
+    runs = 0
+    outs = 0
+    while outs < 3:
+        at_bat = np.random.binomial(n=1, p=p)
+        if at_bat == 1:
+            runs += 1
+        else:
+            outs += 1
+    inning_runs[i] = runs
+
+# average number of runs
+print(f"The average number of runs per inning is {inning_runs.mean()}.")
+```
+
+### Plotting Simulations
+The average runs per inning is useful, but it hides a lot of variability. A histogram lets us see the full distribution of outcomes—how often we get scoreless innings, how common multi‑run innings are, and how heavy the tail is.
+
+```{python}
+import matplotlib.pyplot as plt
+
+# Histogram of Runs Per Inning
+bins = np.arange(inning_runs.min(), inning_runs.max() + 2, 1)
+plt.hist(inning_runs, bins=bins, edgecolor="black", density=True)
+plt.title("Distribution of Runs Per Inning")
+plt.xlabel("Runs in Inning")
+plt.ylabel("Density")
+plt.show()
+```
+
+Now, it is easy for us to analyze our simulations. We see that  in over 70% of the simulations, the offensive team never scores a single run. 
+
+Similarly, we can **estimate the probability** of getting at least 1 run: 
+
+```{python}
+# Probability of scoring at least 1 run? 
+(inning_runs > 0).mean()
+```
+
+
+
+## Simulating a Game
+Now imagine you had two teams - one hits a homerun with probability `p1 = 0.1` and the second with probability `p2 = 0.12`. If they played a game, we would expect the second team to win. But if they played 100 games against each other, would we expect the second team to win all 100 games? If not, how many would we expect them to win? We will answer this question by simulating 100 games of such teams. We start with simulating one game. To make this easier, I am going to create a function, called inning, that simulates a teams at bat (really it should be called half-inning)
+
+Define an inning function.
+
+```{python}
+def inning(p):
+    runs = 0
+    outs = 0
+
+    while outs < 3:
+        at_bat = np.random.binomial(n=1, p=p)
+        if at_bat == 1:
+            runs += 1
+        else:
+            outs += 1
+    return runs
+
+```
+Simulate one game.
+
+```{python}
+p1 = 0.10 # Prob(Team 1 hits home run)
+p2 = 0.12 # Prob(Team 2 hits home run)
+
+# =============
+# Simulate Game
+# =============
+score1 = 0
+score2 = 0
+inning_num = 1
+while (inning_num <= 9) or (score1 == score2):
+    score1 += inning(p1)
+    score2 += inning(p2)
+    inning_num += 1
+
+# Print Game Result
+print(f"Team 1 Score: {score1}")
+print(f"Team 2 Score: {score2}")
+if score1 > score2: 
+  print("Team 1 Wins!") 
+elif score1 < score2: 
+  print("Team 2 Wins!") 
+else: 
+  print("TIE") 
+```
+
+## Simulating Many Games
+
+```{python}
+num_sims = 1000 # number of simulations
+p1 = 0.10 # Prob(Team 1 hits home run)
+p2 = 0.12 # Prob(Team 2 hits home run)
+
+# initialize vectors to save results
+score1_sim = np.empty(num_sims, dtype=int)
+score2_sim = np.empty(num_sims, dtype=int)
+
+# Run Simulations
+for i in range(num_sims):
+
+    # Simulate Game
+    score1 = 0
+    score2 = 0
+    inning_num = 1
+    while (inning_num <= 9) or (score1 == score2):
+
+        # Simulate Inning
+        score1 += inning(p1)
+        score2 += inning(p2)
+        inning_num += 1
+
+    # Save Results
+    score1_sim[i] = score1
+    score2_sim[i] = score2
+
+# Output Results
+team2_wins = (
+  (score1_sim < score2_sim) &  # team 2 beats team 1
+  (score1_sim != score2_sim)   # excluding ties
+)
+print(f"Team 2 beats Team 1 in {round(team2_wins.mean() * 100, 2)}% of the simulations.")
+```
+
+We plot the simulated scores as overlapping histograms to compare the two teams directly. This makes it easy to see both the typical score for each team and the amount of overlap between their score distributions. In our simulation, Team 2 scores more on average, but that does not guarantee a win in any single game—Team 1 can still have an unusually strong performance and outscore Team 2 in a given simulation.
+
+```{python}
+bins = np.arange(
+    min(score1_sim.min(), score2_sim.min()),
+    max(score1_sim.max(), score2_sim.max()) + 2,
+    1
+)
+
+plt.hist(score1_sim, bins=bins, color="blue", alpha=0.5,
+edgecolor="black", label="Team 1", density=True)
+plt.hist(score2_sim, bins=bins, color="red", alpha=0.5,
+edgecolor="black", label="Team 2", density=True)
+plt.xlabel("Score")
+plt.ylabel("Density")
+plt.title("Team Score Distributions")
+plt.legend()
+plt.show()
+```
+
+## More Simulation Functions
+I've added some additional simulation functions for your reference. If you have taken probability theory, you are probably familiar with these distributions. If you have not taken probability theory, do not worry. 
+
+```python
+# discrete outcomes
+np.random.choice(["A", "B", "C"], p=[0.2, 0.5, 0.3], size=1)
+
+# binary outcomes
+np.random.binomial(n=10, p=0.7, size=1) 
+
+# categorical outcomes
+np.random.multinomial(n=1, pvals=[0.5, 0.3, 0.2], size=1) 
+
+# uniformly random number between 0 and 1
+np.random.uniform(0, 1, size=1) 
+
+# continuous random numbers centered around some value
+np.random.normal(loc=0, scale=1, size=1)
+  # loc: mean 
+  # scale: variance 
+
+# number of events in a fixed unit of time
+np.random.poisson(lam=2.3, size=1)
+  # lam: average number of events
+
+# number of discrete events until success
+np.random.geometric(p=0.3, size=1) 
+
+# continuous time until success
+np.random.exponential(scale=2.0, size=100)
+  # scale: average time between events
+```
+
+## Conclusion
+
+- Simulations provide a practical way to analyze complex processes that are hard to solve analytically.  
+- They are flexible: we can change assumptions, run many scenarios, and explore outcomes quickly.  
+- The results can be interpreted probabilistically, helping us estimate probabilities and distributions rather than single outcomes.  
+- Advice: these complex processes can often be broken down into simpler parts. When designing a simulation, work your way up from the simplest components to more sophisticated ones. 
+
+---
+
+# Group Activity
+
+### Football Simulation
+A football team achieves first down if they gain 10 yards.  Consider a football team that gains  
+
+- 5 yards with probability 0.25,   
+- 4 yards with probability 0.35,   
+- 0 yards with probability 0.3, and   
+- -2 yards with probability 0.1.  
+
+What is the probability they get a first down within 4 plays? Write and run a simulation to answer this question. 
+
+Hint: useful functions might include `np.random.choice` or `np.random.multinomial`.  
+
+
+```{python}
+np.random.seed(123)
+probabilities = [.25, .35, .3, .1]
+yds = [5, 4, 0, -2]
+n = 1000
+success = 0
+
+for i in range(n):
+    plays = np.random.choice(yds, p=probabilities, size=4)
+    if sum(plays) >= 10:
+      success += 1
+
+probability = success / n
+
+print(f"probability of getting a first down: {probability:.4f}")
+```
+
+### Basketball Simulation
+Imagine a team that has a shooting percentage of 52% for 2-point field goals, and 36% for 3-point field goals. They shoot 3-point field goals on 33% of their possessions, and 2-point field goals on 67% of their possessions.
+
+Now imagine a second team that has the exact same shooting percentage for both 2-point and 3-point field goals, but they shoot 3-point field goals on 43% of their possessions, and 2-point field goals on 57% of their possessions. 
+
+In other words, the two teams are equally skilled but strategies differ: one team shoots more 3-pointers than the other. 
+
+If these two teams play, what is the probability that the second team wins? Assume that each team gets 100 possessions per game. We will allow for ties. Does this change if we assume that each team gets 110 possessions per game? If so, by how much? Write and run a simulation that estimates these probabilities.
+
+
+```{python}
+np.random.seed(123)
+possessions = 100
+def simulate_game(possessions, n = 1000):
+  fg2, fg3 = .52, .36
+  poss3_1, poss3_2 = .33, .43
+  team1_3pt_att = np.random.binomial(n=possessions, p=poss3_1, size=n)
+  team1_2pt_att = possessions - team1_3pt_att
+  
+  team2_3pt_att = np.random.binomial(n=possessions, p=poss3_2, size=n)
+  team2_2pt_att = possessions - team2_3pt_att
+  
+  team1_pts = (np.random.binomial(n=team1_3pt_att, p=fg3) * 3 + np.random.binomial(n=team1_2pt_att, p=fg2) * 2)
+  team2_pts = (np.random.binomial(n=team2_3pt_att, p=fg3) * 3 + np.random.binomial(n=team2_2pt_att, p=fg2) * 2)
+
+  return np.mean(team2_pts > team1_pts)
+
+
+probability_100 = simulate_game(100)
+probability_110 = simulate_game(110)
+
+print(f"team 2 win prob with 100 possessions: {prob_100:.4f}")
+print(f"team 2 win prob with 110 possessions: {prob_110:.4f}")
+print(f"change: {prob_110 - prob_100:.4f}")
+
+
+```
+--- 
+

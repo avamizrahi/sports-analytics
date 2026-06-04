@@ -1,0 +1,39 @@
+# ---- Quarto build output ----
+_site/
+_book/
+.quarto/
+.quarto-cache/
+.quarto/_freeze/
+
+# ---- Rendered documents ----
+*.html
+*.pdf
+*.docx
+*.pptx
+
+# ---- Execution / cache ----
+*_cache/
+*_files/
+.cache/
+.ipynb_checkpoints/
+
+# ---- R specific ----
+.Rhistory
+.RData
+.Ruserdata
+.Rproj.user/
+
+# ---- Python specific ----
+__pycache__/
+*.pyc
+.venv/
+env/
+
+# ---- OS files ----
+.DS_Store
+Thumbs.db
+
+# ---- Editor files ----
+.vscode/
+.idea/
+*.swp

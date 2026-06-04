@@ -1,0 +1,313 @@
+---
+title: "Final Paper"
+author: "Ava, Jake, Esha, Dora"
+format: 
+  html: default
+  pdf: default
+fontsize: 11pt
+---
+
+## Introduction
+
+Basketball is a high-speed game of limited possessions, where small efficiency gains can make all the difference. Today’s NBA relies heavily on analytics, including player tracking and predictive modeling. Teams today use efficiency metrics to capture performance instead of just looking at basic box score statistics. Modern analytics like offensive rating, defensive rating, and shot selection have become crucial in evaluating team performance and coaching strategy.
+
+This project analyzes game-level data from 2021-2025 for four NBA teams: the Phoenix Suns, Dallas Mavericks, Sacramento Kings, and San Antonio Spurs. This dataset provides a strong framework for comparing how playing styles and efficiency influence success by using multiple teams. Using elite and lower-seeded teams strengthens the analysis of meaningful performance patterns. The primary research question in our analysis is: how do offensive efficiency, defensive efficiency, and shot selection (specifically 2-point and 3-point attempt rates) influence a team’s probability of winning games, and how do the Phoenix Suns compare to other NBA teams in these relationships? This study aims to identify performance indicators that distinguish elite NBA teams from average or underperforming ones.
+
+Winning in basketball relies on balancing defensive performance with efficient scoring. In an era dominated by threes and fast-paced scoring, this balance is more important than ever. Teams can analyze these variables and pinpoint whether to focus on improving defense, boosting efficiency, or refining their shooting strategy. We used possession-adjusted stats like offensive and defensive ratings, three-point attempt rate, and turnover percentage to help answer our question. These variables were analyzed using linear regression (for score margins) and logistic regression (for win probability). This helps provide a complete picture of the factors influencing NBA team success.
+
+## Data
+
+We used team-level NBA game log data for the Phoenix Suns, Sacramento Kings, Dallas Mavericks, and San Antonio Spurs from the 2021-2025 seasons. The data was found from sports-reference, and the files were stored locally as CSVs. The CSVs were added to a Data folder in Positron and then loaded using Python. Each unit of observation is a single game. The original datasets included box score statistics, opponent statistics, and advanced metrics like offensive rating, defensive rating, pace, three-point attempt rate, true shooting percentage, effective field goal percentage, turnover percentage, and offensive rebounding percentage. 
+
+During data cleaning, we combined the four team CSV files into one games dataset, added a team label, renamed columns, and created new variables including Win, Home, PointDiff, Season, and 2PAr. We also removed duplicate columns and converted key variables to numeric so they could be used in our EDA and regression models.
+
+```{python}
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt 
+```
+
+```{python}
+# importing datasets
+suns = pd.read_csv("DataFolder/Suns_21-25.csv")
+kings = pd.read_csv("DataFolder/Kings_21-25.csv")
+mavs = pd.read_csv("DataFolder/Mavs_21-25.csv")
+spurs = pd.read_csv("DataFolder/Spurs_21-25.csv")
+
+suns["Team"] = "Suns"
+kings["Team"] = "Kings"
+mavs["Team"] = "Mavs"
+spurs["Team"] = "Spurs"
+
+# putting them all into one dataset called 'games'
+games = pd.concat([suns, kings, mavs, spurs], ignore_index=True)
+```
+
+```{python}
+# renaming columns
+games = games.rename(columns={"Unnamed: 3": "HomeAway", "Opp.1": "OppPoints"})
+
+# Adding variables Win, Home game, point difference, 2 point attempt rate
+games["Win"] = games["Rslt"].map({"W": 1, "L": 0})
+games["Home"] = np.where(games["HomeAway"] == "@", 0, 1)
+games["PointDiff"] = games["Tm"] - games["OppPoints"]
+games["2PAr"] = games["2PA"] / games["FGA"]
+
+
+# Remove extra columns
+drop_cols = ["Rk", "Gtm", "OT", "eFG%.1", "eFG%.2", "eFG%.3", "TOV%.1", "ORB%.1", "FT/FGA.1", "FG.1", "FGA.1", "FG%.1", "3P.1", "3PA.1", "3P%.1", "2P.1", "2PA.1", "2P%.1", "FT.1", "FTA.1", "FT%.1", "ORB.1", "DRB.1", "TRB.1", "AST.1", "STL.1", "BLK.1", "TOV.1", "PF.1"]
+games = games.drop(columns=drop_cols, errors="ignore")
+
+# Change Date col format & create a Season col 
+games["Date"] = pd.to_datetime(games["Date"], format="mixed", errors="coerce")
+games["Season"] = games["Date"].dt.year
+
+# Make columns numeric
+num_cols = ["Tm", "OppPoints", "PointDiff", "ORtg", "DRtg", "Pace", "3PAr", "2PAr", "TOV%", "ORB%", "TS%", "eFG%"]
+for col in num_cols:
+    games[col] = pd.to_numeric(games[col], errors="coerce")
+
+games.head()
+```
+
+
+```{python}
+# Create df just for the EDA 
+eda_df = games[["Team", "Season", "Date", "Opp", "Home", "Win", "Tm", "OppPoints", "PointDiff", "ORtg", "DRtg", "Pace", "3PAr", "2PAr", "TOV%", "ORB%", "TS%", "eFG%"]].copy()
+```
+
+```{python}
+# Summary of team data
+team_summary = eda_df.groupby("Team")[["Win", "PointDiff", "ORtg", "DRtg", "Pace", "3PAr", "2PAr", "TOV%", "ORB%", "TS%", "eFG%"]].mean()
+print(team_summary)
+```
+
+## EDA 
+
+After cleaning the data, we began with the Exploratory Data Analysis (EDA). We started by first creating a smaller dataset with the main variables we wanted for comparison. These variables were team, season, win result, point differential, offensive rating, defensive rating, pace, three-point attempt rate, turnover percentage, offensive rebounding percentage, true shooting percentage, and effective field goal percentage. We created a summary table to look at average performance by team and get a gauge on the dataset. The Suns had the highest average win percentage at 0.591, the best average point differential at +2.409, and the best defensive rating at 113.647. This provided initial insight that the Suns’ biggest advantage was their defense. 
+
+We also compared shot selection by looking at three-point attempt rate and two-point attempt rate. The Mavericks had the highest three-point attempt rate at 0.439, but they did not have the highest win percentage, which showed us that taking more threes does not automatically lead to more wins. When looking only at the Suns’ data, they had stronger offensive and defensive ratings, higher shooting efficiency, and fewer turnovers when they won. This showed that the Suns are effective when they combine efficient scoring and strong defense. Their three-point attempt rate did not seem to be the main difference between wins and losses. 
+
+Using visualizations, we were able to continue to support these claims. A win percentage bar chart showed that the Suns performed the best overall. The offensive and defensive rating chart showed that the Suns and Mavericks had similar offensive production, but the Suns had better defensive numbers. The scoring efficiency chart showed that shooting efficiency mattered more than the amount or type of shots. The Suns' only boxplots also showed clear differences in offensive rating, defensive rating, and true shooting percentage between wins and losses. Overall, the EDA suggested that the most important variables to take into the regression models were ORtg and DRtg. It also suggested that 3PAr, ORB%, and TOV% might be weaker predictors. 
+
+```{python}
+# Suns Wins & Losses table
+suns_df = eda_df[eda_df["Team"] == "Suns"].copy()
+suns_wins_losses = suns_df.groupby("Win")[["ORtg", "DRtg", "3PAr", "2PAr", "TOV%", "ORB%", "TS%", "eFG%", "PointDiff"]].mean()
+print(suns_wins_losses)
+```
+
+```{python}
+# Win Percentage by Team bar chart
+plt.figure()
+win_pct = eda_df.groupby("Team")["Win"].mean().sort_values(ascending = False)
+plt.figure()
+win_pct.plot(kind = "bar")
+plt.ylabel("Win %")
+plt.title("Win % by Team")
+```
+
+```{python}
+# ORtg and DRtg by team
+plt.figure()
+ratings = eda_df.groupby("Team")[["ORtg", "DRtg"]].mean()
+ratings.plot(kind = "bar")
+plt.title("Avg Offensive and Defensive Rating by Team")
+plt.ylabel("Rating")
+```
+
+```{python}
+# Shot type by team
+plt.figure()
+shot_type = eda_df.groupby("Team")[["3PAr", "2PAr"]].mean()
+shot_type.plot(kind = "bar")
+plt.title("Shot selection by team")
+plt.ylabel("Attempt rate")
+```
+
+```{python}
+# Efficiency by Team
+plt.figure()
+efficiency = eda_df.groupby("Team")[["TS%", "eFG%"]].mean()
+efficiency.plot(kind = "bar")
+plt.ylabel("Efficiency")
+plt.title("Scoring efficiency by team")
+```
+
+```{python}
+# Win percentage by team and season
+season_team = eda_df.groupby(["Season", "Team"])["Win"].mean().unstack()
+season_team.plot(figsize=(10,5), marker="o")
+plt.title("Win Percentage by Season")
+plt.xlabel("Season")
+plt.ylabel("Win Percentage")
+plt.show()
+```
+
+```{python}
+# Offensive rating in wins vs losses
+plt.figure()
+suns_df.boxplot(column = "ORtg", by = "Win")
+plt.title("Suns ORtg in Wins vs Losses")
+plt.xlabel("Win")
+plt.ylabel("ORtg")
+```
+
+```{python}
+# Defensive rating in wins vs losses
+plt.figure()
+suns_df.boxplot(column = "DRtg", by = "Win")
+plt.title("Suns DRtg in Wins vs Losses")
+plt.xlabel("Win")
+plt.ylabel("DRtg")
+```
+
+```{python}
+# Suns TS% by win vs loss
+plt.figure()
+suns_df.boxplot(column = "TS%", by = "Win")
+plt.title("Suns TS% in Wins vs Losses")
+plt.xlabel("Win")
+plt.ylabel("TS%")
+```
+
+```{python}
+# Suns DRtg vs Point Differential
+plt.figure()
+plt.scatter(suns_df["DRtg"], suns_df["PointDiff"])
+plt.title("Suns DRtg vs Point Differential")
+plt.xlabel("DRtg")
+plt.ylabel("Point Differential")
+```
+
+```{python}
+plt.figure()
+plt.hist(suns_df["PointDiff"], bins = 20)
+plt.title("Distribution of Suns Point Differential")
+plt.xlabel("Point Differential")
+plt.ylabel("Frequency")
+```
+
+## Linear Regression
+
+To identify key predictors of the Suns' wins, we ran two linear regression models across four seasons: one for our four teams in the league, and one focused on the Suns. Since our target point differential is continuous, we used ordinary least squares (OLS) regression. Instead of just predicting wins or losses, this approach provided better insights into overall team quality and the expected margin of victory. Both models shared five key predictors: ORtg, DRtg, 3PAr, TOV%, and home-court advantage, based on findings from our EDA.
+
+The combined team data model consisted of 1,311 games. The results showed a strong overall fit (R² = 0.887), indicating that the model explains nearly 89% of the variation in point differentials across all teams. The most important predictors were offensive rating and defensive rating, both of which were highly statistically significant. ORtg had a coefficient of 0.936 with a p-value less than 0.001, and DRtg had a coefficient of -0.939 with a p-value of 0.001. A one-unit increase in ORtg was associated with an increase of 0.94 points in point differential, while a one-unit increase in DRtg was associated with a decrease of approximately 0.94 points. This indicates that offense and defense have nearly equal but opposite effects on game outcomes across teams. The remaining predictors, 3PAr (p = 0.982), TOV% (p = 0.359), and home-court advantage (p = 0.857), were not statistically significant in this combined model. In this model, controlling the overall efficiency of the game matters far more than simply taking more three-point shots or playing at home.
+
+```{python}
+# Combined teams regression
+import statsmodels.api as sm
+reg_df = eda_df[["PointDiff", "ORtg", "DRtg", "3PAr", "TOV%", "Home"]].dropna()
+X = reg_df[["ORtg", "DRtg", "3PAr", "TOV%", "Home"]]
+y = reg_df["PointDiff"]
+X = sm.add_constant(X)
+model_linear = sm.OLS(y, X).fit()
+print(model_linear.summary())
+```
+
+To analyze team-specific effects, a second linear regression was conducted, focusing exclusively on Phoenix Suns games. This model was fit on 327 games and had a lower overall fit (R² = 0.547) with ORtg and DRtg remaining the strongest predictors. For the Suns, every one-unit improvement in ORtg increased their point differential by 0.67 points (p < 0.001), while a one-unit improvement in DRtg decreased point differential by 0.74 points (p < 0.001). These findings suggest that defensive efficiency is a slightly more critical determinant of overall success for the Suns than offensive efficiency, even though both are important. The Suns’ turnover percentage showed a stronger negative coefficient than the combined model, despite not having statistical significance (p = 1.04). This indicates that turnovers may be one of the main reasons for their losses. Additionally, the three-point attempt rate showed no meaningful effect (p = 0.707), reinforcing that shot selection alone does not drive outcomes.
+
+```{python}
+# Suns only regression
+suns_reg = suns_df[["PointDiff", "ORtg", "DRtg", "3PAr", "TOV%", "Home"]].dropna()
+X_suns = suns_reg[["ORtg", "DRtg", "3PAr", "TOV%", "Home"]]
+y_suns = suns_reg["PointDiff"]
+X_suns = sm.add_constant(X_suns)
+model_suns_linear = sm.OLS(y_suns, X_suns).fit()
+print(model_suns_linear.summary())
+```
+
+## Logistic Regression
+
+To determine which variables most strongly influence the probability of winning for the Suns, we ran two logistic regression models across four seasons; one model was dedicated to all teams combined, and the other model used Suns-only data. We chose to utilize logistic regression because the outcome variable, Win, is binary (win = 1, loss = 0). This allowed us to demonstrate the probability of winning given a set of game performance variables, rather than just predicting a continuous outcome. In both models, we utilized the same five predictors, which included offensive rating (ORtg), defensive rating (DRtg), three-point attempt rate (3PAr), turnover percentage (TOV%), and home court advantage (Home). These variables were selected based on the findings in our EDA, which identified defensive efficiency and scoring efficiency as the strongest separators between wins and losses. A Win column was created by converting point differential to a binary outcome, where any game with a positive point differential was noted as a win.
+
+Our all teams model, which included data from 4 seasons for the Spurs, Suns, Mavs, and Kings, had a total of 1,312 games. This model produced a strong Pseudo R² of 0.684, demonstrating that the five predictors did explain a large portion of the variation in wins and losses across those teams. ORtg (coefficient of 0.363, p < 0.001) and DRtg (coefficient of -0.356, p < 0.001) were the only statistically significant predictors, and their nearly identical magnitudes indicated that offense and defense contribute roughly equally to winning for the four teams. This showed that these teams have a greater win probability when they score and defend efficiently in games. Our three other predictors, 3PAr (p = 0.469), TOV% (p = 0.521), and Home (p = 0.930), were all insignificant, meaning that shot selection, turnovers, and home court advantage do not meaningfully improve our ability to predict win probability for those teams. 
+
+```{python}
+import statsmodels.formula.api as smf
+# Create "Win" column from "PointDiff"
+reg_df["Win"] = (reg_df["PointDiff"] > 0).astype(int)
+
+# Combined teams logistic regression
+log_fit_combined = smf.logit("Win ~ ORtg + DRtg + Q('3PAr') + Q('TOV%') + Home", data=reg_df).fit()
+print(log_fit_combined.summary())
+```
+
+Our Suns-only model was fit on 328 games and had a similar result. The model produced a moderate Pseudo R² of 0.382, which was lower than the all teams combined model, suggesting that the Suns' wins are influenced by other factors beyond the five variables included. Other factors likely include individual player performance and specific opponent matchup dynamics. The ORtg (coefficient of 0.133, p < 0.001) and DRtg (coefficient of -0.154, p < 0.001) demonstrated to be the only statistically significant variables, with DRtg having a slightly stronger effect than ORtg. This was consistent with the EDA finding that defense is the Suns’ biggest separator from other teams. Similar to our all teams combined model, 3PAr (p = 0.464), TOV% (p = 0.084), and Home (p = 0.304) were all deemed insignificant. The results from this model can show that during games where the Suns’ defensive rating increases, meaning where they allow more points per 100 possessions, their probability of winning drops more sharply than during games when their offense underperforms. Prioritizing defensive effort and limiting opponent efficiency should therefore be the primary focus when preparing for games, making in-game adjustments, and evaluating player and roster decisions.
+
+```{python}
+import statsmodels.formula.api as smf
+# Suns only logistic regression
+log_fit = smf.logit("Win ~ ORtg + DRtg + Q('3PAr') + Q('TOV%') + Home", data=suns_df).fit()
+print(log_fit.summary())
+```
+
+## Validation
+
+To back up and validate our findings through EDA, linear, and logistic regression, we used both Lasso regression and confidence intervals. They were both done for the combined and the Suns-only datasets. Lasso regression is in some ways similar to linear regression, but it has a much harsher penalty on less important variables and shrinks their coefficients to zero. This helps identify which of the predictors are best at contributing to the model's performance and which are not important. For the combined model, ORtg and DRtg had very large coefficients with opposite signs, 10.95 and -11.04, making them the dominant predictors. This backed up our previous regression results that ORtg and DRtg are the strongest predictors in point differential. 3PAr and Home both shrunk to zero and indicated that they had little predictive power in the model. TOV% had a very small coefficient, -.06, which shows that it has a slight influence on the model, but it is much weaker compared to ORtg and DRtg.
+
+```{python}
+# Lasso Regression for entire data
+from sklearn.linear_model import LassoCV
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
+X = reg_df[["ORtg", "DRtg", "3PAr", "TOV%", "Home"]]
+y = reg_df["PointDiff"]
+lasso_pipeline = Pipeline([("scaler", StandardScaler()), ("lasso", LassoCV(cv = 5))])
+lasso_pipeline.fit(X, y)
+lasso = lasso_pipeline.named_steps["lasso"]
+coefficients = pd.Series(lasso.coef_, index = X.columns)
+print(coefficients)
+```
+
+The Suns-only Lasso regression model had very similar results to the combined model. ORtg and DRtg had the largest coefficients, with ORtg having a slightly less strong positive coefficient of 7.09, and DRtg having a strong negative coefficient of -8.89. The biggest difference between the models can be seen in the TOV% coefficient, -.81. It was still small compared to ORtg and DRtg, but it was significantly larger than in the combined model. Turnovers are likely more important to the Suns' chances of winning than to the other teams. 3PAr and Home had near-zero coefficients in the Suns-only model, just as in the previous model.
+
+```{python}
+# Lasso Regression for suns only
+X_suns = suns_reg[["ORtg", "DRtg", "3PAr", "TOV%", "Home"]]
+y_suns = suns_reg["PointDiff"]
+lasso_pipeline.fit(X_suns, y_suns)
+lasso_suns = lasso_pipeline.named_steps["lasso"]
+coeff_suns = pd.Series(lasso_suns.coef_, index = X_suns.columns)
+print(coeff_suns)
+```
+
+Confidence intervals for both the linear and logistic regression models were also evaluated. Confidence intervals for the Suns-only and combined models for both regressions were made. In all four confidence intervals, ORtg and DRtg did not include zero. This confirms that both variables were statistically significant and strong predictors of point differential. 3PAr, Home, and TOV% had zero included in all four of the confidence intervals created. 3PAr and Home did not come particularly close to having zero in their intervals, showing that they are not generally significant predictors. TOV% did include zero in every interval, but for the Suns-only logistic regression interval, it came extremely close to excluding zero (-.18, .011). This aligns with what was found in the Suns-only Lasso regression, that TOV% is more significant for the Suns compared to the other teams included. Overall, the validation methods supported the conclusions found previously in our analysis.
+
+```{python}
+# Confidence interval for linear model
+ci_linear = model_linear.conf_int()
+print(ci_linear)
+```
+
+```{python}
+# Confidence interval for suns linear model
+ci_suns_linear = model_suns_linear.conf_int()
+print(ci_suns_linear)
+```
+
+```{python}
+# Confidence interval for logistic model
+ci_log = log_fit_combined.conf_int()
+print(ci_log)
+```
+
+```{python}
+# Confidence interval for suns logistic model
+ci_suns_log = log_fit.conf_int()
+print(ci_suns_log)
+```
+
+## Conclusions
+
+Across both the Phoenix Suns-only analysis and the analysis of the Suns, Sacramento Kings, Dallas Mavericks, and San Antonio Spurs combined, similar conclusions can be made. Across all of them, offensive rating and defensive rating are consistently the strongest predictors in predicting a win. When observing the combined data models, ORtg and DRtg contribute nearly equally to winning, with ORtg vs DRtg coefficients in the linear model being 0.94 vs -0.94, and 0.363 vs -0.356 in the logistic model. When looking at the Suns-only models, DRtg has a stronger effect than before. This suggests that the success of the Suns is more dependent on their defensive play than the rest of the teams included. These findings can be backed up by our EDA, where the Suns' probability of winning would fall much greater when their DRtg was high compared to when their ORtg was low.
+
+While ORtg and DRtg were consistently very strong predictors of winning, three-point attempt rate, turnover percentage, and home-court advantage were generally not statistically significant. This shows that increasing or decreasing the number of three-point shots cannot significantly improve a team's chance of winning while efficiency metrics are included. Across every model, ORtg and DRtg explained the variation in the team’s success far more than any of the other variables. The validation methods that were done backed up these conclusions. Lasso regression kept ORtg and DRtg in both models while shrinking the other variables toward zero in the combined model. The Suns-only model did have the TOV% coefficient a bit larger, showing that TOV% is more important to the Suns than the other teams that were included. The confidence intervals only strengthened these claims of ORtg and DRtg being our strongest predictors, with TOV% being slightly significant for the Suns. 
+
+When looking at all the evidence presented, the Phoenix Suns should prioritize their efforts towards their performance on the defensive end of the ball, while keeping consistent and strong offensive efficiency. When preparing for games and evaluating player performance for roster decisions, the Suns should place less emphasis on 3PAr or TOV% alone. However, the conclusions made through this data are limited to team performance and the regular season. These conclusions could be strengthened even more by looking more into how individual players perform in these metrics and if there are changes in the playoffs.
+
+## Recommendations for Future Work
+
+There are quite a few ways future work could be done with this analysis, including expanding the dataset to include more seasons and player-level data, while adding opponent strength as a predictor. First, including more than four seasons and expanding beyond the four teams analyzed would increase our sample size greatly. This would allow us to test whether the same predictors consistently drive wins over a greater time period. It would also allow us to see how the relative importance of these variables changes across years. Since our combined model was limited to four NBA teams, the results may not fully generalize to the league as a whole. Incorporating player-level data, such as Devin Booker’s scoring output, individual defensive metrics, and player minutes, would enhance our models, as these factors would help explain the game-to-game variability that team-level efficiency stats do not account for. Additionally, our models would benefit from adding opponent strength as a predictor of win probability. A high ORtg could be inflated by a weak defensive team, which would not reflect true offensive performance. Controlling for this would allow coaches and analysts the opportunity to identify which games the Suns perform well in, versus benefiting from weak competition.
+
+Beyond these improvements to our models, there are additional broader questions worth exploring with future work. An important question is whether the same variables that predict regular-season wins also predict playoff wins. Playoff games provide a great difference in pace, defensive intensity, and game-to-game adjustments compared to the regular season, so it is possible that different factors drive winning probability. Another question to consider is how our models change when key players, such as Devin Booker or Jalen Green, are injured or resting. What are the effects on our variables' predictive power when these players miss a game, or does the team rely on entirely different factors? Answering such broader questions would allow coaches and analysts to understand a more reliable tool for game planning across different situations and contexts.

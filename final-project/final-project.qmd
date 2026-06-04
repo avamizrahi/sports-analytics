@@ -1,0 +1,198 @@
+---
+title: "Final Project"
+author: "DATA 367 — Statistical Methods in Sports Analytics"
+format:
+  html: default
+  pdf: default
+fontsize: 11pt
+---
+
+## Overview
+
+The project has four parts, each with its own deadline and submission method. **Parts 1–3 are group work submitted to your shared GitHub Classroom repository. Part 4 (the Reflection) is an individual assignment submitted to a separate GitHub Classroom repository.**
+
+| Part | Points | Due | Submission |
+|------|--------|-----|------------|
+| Team Sport Presentation | 60 | QMD: Fri Apr 2 at 11:59pm; Presentations: Apr 6 & 8 | Group GitHub Classroom repo |
+| Final Results Paper | 50 | Wed May 6 at 11:59pm | Group GitHub Classroom repo |
+| Final Results Presentation | 80 | May 4, 6 & May 12 (3:30–5:30pm) | Group GitHub Classroom repo |
+| Reflection on Project | 10 | Wed May 6 at 11:59pm | **Individual** GitHub Classroom repo |
+| **Total** | **200** | | |
+
+### Attendance During Project Work Days
+
+Weeks 10–15 include class days devoted to project work (group meetings). Attendance on those days matters. Being present and working is how the project gets done, and how your instructor can see each member contributing.
+
+If you have more than **two absences** on project work days, your overall final project grade will be reduced by **10%**. More than **four absences** reduces it by **20%**, and more than **six absences** reduces it by **30%**.
+
+---
+
+## Part 1: Team Sport Presentation
+
+**60 points | QMD due: Friday, April 2, 2026 at 11:59pm | Presentations: April 6 & 8 in class (5–10 minutes)**
+
+This presentation is your team's formal introduction to your project. Think of it as a project kickoff meeting. Your audience is your instructor and classmates, but you should speak as if you are professionals presenting a project plan.
+
+Submit your presentation as a **Quarto presentation file (`.qmd`)** committed to your group GitHub Classroom repository by Friday, April 2 at 11:59pm. Your team will present on April 6 or April 8. Teams will be randomly assigned to present on April 6 or April 8. Presentations should be **5–10 minutes**.
+
+### Required Content
+
+**Sport Introduction.** Give your audience enough background to understand your project. What sport are you analyzing? What are the relevant rules, terminology, and positions? Keep this focused. Your audience doesn't necessarily need a history of your sport, but they do need to understand the things that matter for your analysis.
+
+**Project Overview and Motivation.** What problem or question is your team trying to address? Why does it matter in your sport? Explain the motivation from the coach's perspective: what do coaches want to know, and how will a data-driven answer help them?
+
+**Semester Goal.** State one clear, specific goal for what your team will accomplish by the end of the semester. This should be concrete enough that at the Final Results Presentation it will be obvious whether or not you achieved it.
+
+"By the end of the semester, we will build a statistical model using NBA play-by-play or game-level data from the last three seasons to quantify the relationship between three-point attempt rate, two-point attempt rate, and winning percentage for the Boston Celtics and their top five competitors, and identify which shooting profile is most strongly associated with winning."
+
+**Benchmarks and Task Breakdown.** Identify every major task that must be completed to reach your semester goal, and build a benchmark schedule for the project. What are the milestones? What does "done" look like for each one? A good benchmark is specific: "collect play-by-play data for the last three seasons" is a benchmark; "work on data" is not.
+
+**Timeline.** Give a specific deadline for each benchmark. Present this as a project calendar or timeline slide.
+
+**Team Member Assignments.** Identify which team member is responsible for each task. Every member should have a clearly defined role. Responsibility doesn't mean working alone, it means owning the task and making sure it gets done.
+
+### Rubric
+
+| Criterion | Points | Description |
+|-----------|--------|-------------|
+| **Sport Introduction** | 8 | The audience understands the sport, the relevant terms, and the team/program without prior knowledge. |
+| **Project Overview & Motivation** | 10 | The problem is clearly stated. The motivation from the coaching staff's perspective is explained. |
+| **Semester Goal** | 8 | A specific, achievable goal is stated. It will be clear at the end of the semester whether or not it was met. |
+| **Benchmarks & Task Breakdown** | 14 | Every major task is identified and described. Benchmarks are specific and meaningful (not vague). |
+| **Timeline** | 8 | Each benchmark has a deadline. The schedule is realistic given the course calendar. |
+| **Team Member Assignments** | 7 | Every team member has a defined role. Responsibility for each task is clearly assigned. |
+| **Presentation Quality** | 5 | Slides are organized and readable. Delivery is clear and professional. Time is used appropriately (5–10 min). |
+| **Total** | **60** | |
+
+---
+
+## Part 2: Final Results Paper
+
+**50 points | Due: Wednesday, May 6, 2026 at 11:59pm | Commit to group GitHub Classroom repo**
+
+The Final Results Paper is the complete written record of everything your team did this semester. If the Final Results Presentation is the highlights reel, this paper is where someone goes to find every detail: the data, the code, the analysis, the results, and the reasoning.
+
+Submit the paper as a **Quarto markdown file (`.qmd`)** committed to your group GitHub Classroom repository. Include all data files needed to run your code. Your Python code must execute without errors — you will lose points if it does not run.
+
+### Required Content
+
+**Introduction.** Give the reader enough context to understand the sport, the team, and the problem you were asked to address. Explain the question or goal clearly. Why does it matter, and what was your approach?
+
+**Data.** Describe the data you used. Where did it come from? What time period does it cover? What is the unit of observation? Your code must load the data automatically — either from a local file you include in the submission, or via a web scrape or Python package. The grader should not need to download or locate anything manually.
+
+**Analysis.** Explain the analysis thoroughly. Walk the reader through the methods you used, show the relevant code (commented), and present your results using appropriate visualizations and tables. The reader should be able to follow your reasoning and understand what each result shows. Translate statistical results into plain language — describe what they mean for the coaching staff.
+
+**Conclusions.** What did you find? State your conclusions clearly and keep them proportional to what your analysis actually supports. Do not overreach.
+
+**Recommendations for Future Work.** What would you do next if you had more time, more data, or more resources? Be specific.
+
+### Rubric
+
+This rubric is adapted from the SP25 course rubric for the Final Results Paper.
+
+| Criterion | Points | Description |
+|-----------|--------|-------------|
+| **Data Accessible** | 10 | Data loads without the grader needing to edit the code. Data is loaded via an included file, webscraping, or a Python package. |
+| **Python Code Works Without Error** | 10 | All Python code relevant to the analysis is included and runs without error. |
+| **Introduction** | 6 | Enough context about the sport, team, and methods so the reader understands the questions being explored and the significance of the results. |
+| **Explanation of Analysis** | 6 | Clear and thorough explanation of the analysis. All important details are included. A reader could follow the logic and reproduce the work. |
+| **Results Presented Effectively** | 6 | Results are presented using appropriate tools: words, tables, graphs, etc., in a way that non-data-scientists can understand. |
+| **Results Put into Context** | 6 | Results are explained in terms of the sport. The paper describes how the findings could help the coaching staff, players, or program. |
+| **Recommendations for Future Work** | 6 | Specific, realistic recommendations for how the work could be improved or extended. |
+| **Total** | **50** | |
+
+---
+
+## Part 3: Final Results Presentation
+
+**80 points | May 4, May 6, and May 12 (3:30–5:30pm) | Commit presentation to group GitHub Classroom repo**
+
+The Final Results Presentation is your team's public-facing deliverable and the thing you would show the coaching staff. Your audience includes your instructor and classmates, but you should present as if coaches are in the room. That means you need to explain your results in plain language, show what they actually mean for the team, and make a compelling case for how the work should inform future decisions.
+
+Presentations will be scheduled across the final two weeks of class, including the final exam period (May 12, 3:30–5:30pm). Your team's specific slot will be announced.
+
+Commit your presentation file to your group GitHub Classroom repository before your scheduled presentation time.
+
+### Required Content
+
+**Motivation and Problem Context.** Open by explaining what question you were asked to answer and why it matters to the team. The audience should understand the stakes immediately.
+
+**Significant Results.** Present your most important findings. Use visuals effectively. This section should take up the most time in your presentation — it is the core of what you accomplished.
+
+**Translation for Non-Technical Audiences.** Statistical results need to be explained in terms a coach can act on. What does a regression coefficient mean for how a player should be used? What does a simulation result imply about strategy? Do not leave results as numbers on a slide, but be sure to also tell the audience what they mean.
+
+**Code Demonstration** If your team built a tool, model, or pipeline, demonstrate how it works live or via a walkthrough. Show the audience what the input and output look like, and how a coach or analyst might use it.
+
+**Current Utilization.** Explain specifically how your results or tools could be used right now, with the data and resources that currently exist. How could a coach or analyst use your work to make decisions today? Be specific about what data they would need, how they would access it, and how they would apply your findings.
+
+**Recommendations for Future Work.** Discuss what the next steps would be: more data, improved models, new questions suggested by your findings, or data collection that hasn't been done yet.
+
+### Rubric
+
+| Criterion | Points | Description |
+|-----------|--------|-------------|
+| **Motivation & Problem Context** | 12 | The problem is introduced clearly. The audience immediately understands why it matters to the team. |
+| **Results & Analysis** | 22 | Key results are presented accurately and with appropriate visualizations. The analysis is explained, not just displayed. |
+| **Translation for Non-Technical Audience** | 14 | Results are explained in plain language that coaches and non-statisticians can understand and act on. |
+| **Code Demonstration** | 8 | If code or a tool was developed, it is demonstrated clearly. Input, output, and use are explained. |
+| **Current Utilization** | 10 | The team explains specifically how findings can be used with current data and resources. |
+| **Recommendations for Future Work** | 8 | Specific, realistic next steps are proposed and grounded in the project's findings and limitations. |
+| **Presentation Quality** | 6 | Slides are organized and readable. Delivery is clear and professional. Every team member contributes. |
+| **Total** | **80** | |
+
+---
+
+## Part 4: Reflection on Project
+
+**10 points | Due: Wednesday, May 6, 2026 at 11:59pm | Individual GitHub Classroom repo (separate from group repo)**
+
+::: {.callout-important}
+The Reflection is an **individual assignment**. It is submitted to a **separate GitHub Classroom repository** from the group project. Every student submits their own reflection independently.
+:::
+
+Write a **1–2 page, single-spaced** reflection on your experience working on the sports analytics project this semester. This is not a summary of the project's technical findings — it is a personal reflection on your own work, growth, and experience as part of a team.
+
+### What to Include
+
+Address all three of the following:
+
+**Your Contributions.** Describe specifically what you did on this project. What tasks were you responsible for? What did you actually build, analyze, or write? Be honest, specific and very concrete. Vague generalities are not useful here.
+
+**Professional Development.** Reflect on what you learned from this experience that goes beyond course content. Did you learn anything about how to scope a problem or manage a project timeline? Did anything surprise you about how analytics works in practice?
+
+**Teamwork, Collaboration, and Problem Solving.** Reflect on your experience as a team member. What worked well in your group, and what was difficult? What did you learn about collaboration and communication? How did your team handle disagreements or obstacles?
+
+### Format and Submission
+
+- 1–2 pages, single-spaced, standard margins, 11–12pt font
+- Submit as a `.qmd` file (or `.pdf`) committed to your **individual** GitHub Classroom repository
+- Do not submit to the group repository
+
+### Rubric
+
+| Criterion | Points | Description |
+|-----------|--------|-------------|
+| **Description of Individual Contributions** | 4 | Specific and honest account of what the student personally did on the project. Not a summary of the group's work. This will be cross-checked with the git history. |
+| **Professional Development** | 3 | Thoughtful reflection on growth in communication, problem-solving, or understanding of applied analytics. Goes beyond restating what was done. |
+| **Teamwork & Collaboration** | 3 | Genuine reflection on the experience of working in a team. Addresses both what worked and what was difficult. |
+| **Total** | **10** | |
+
+---
+
+## Submission Summary
+
+All submissions are made by committing to a GitHub Classroom repository. Make sure your team has set up the repository correctly before your first deadline.
+
+| Part | Who Submits | Repository | File(s) | Deadline |
+|------|-------------|------------|---------|----------|
+| Team Sport Presentation | Group | Group repo | `.qmd` presentation | Fri Apr 2 at 11:59pm |
+| Final Results Paper | Group | Group repo | `.qmd` + data files | Wed May 6 at 11:59pm |
+| Final Results Presentation | Group | Group repo | Presentation file | Before your scheduled slot |
+| Reflection | Each student individually | **Individual repo** | `.qmd` or `.pdf` | Wed May 6 at 11:59pm |
+
+
+## Possible Questions/Problems We Can Ask:
+
+Which teams are most dependent on free throws for their scoring and is that sustainable? (we can choose a conference)
+
+Which teams are the most statistically consistent from game to game vs streaky? (we can choose a conference)

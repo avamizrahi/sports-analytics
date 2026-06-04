@@ -1,0 +1,216 @@
+---
+title: "Applied Statistical Analysis in Sports"
+author: "Math 367 — Sports Analytics"
+format:
+  html: default
+  pdf: default
+fontsize: 11pt
+---
+
+## How This Assignment Differs from the Research Paper
+
+Before diving in, it's worth being precise about the distinction between the two major writing assignments in this course, because they require fundamentally different work.
+
+| | Research Paper | Applied Stats Paper |
+|---|---|---|
+| **Source of the question** | Someone else (the article author) | You |
+| **Source of the data** | Found by you (possibly from article) | Found by you |
+| **Analysis performed** | Reproduce or explain someone else's method | Design and execute your own analysis |
+| **Conclusions** | Evaluate the author's argument | Reach your own conclusions from your own results |
+| **Core skill tested** | Critical reading and explanation of analytics | Original analytical thinking and execution |
+
+The Research Paper asks: *Can you understand, explain, and critically evaluate what someone else did?*
+
+This paper asks: *Can you do it yourself?*
+
+That means the primary challenge here is not finding a good article. The challenge here is asking a good question, finding data that can actually answer it, choosing an appropriate method, executing that method correctly, and then being honest about what your results do and do not show. You are the analyst. Your work should stand on its own.
+
+---
+
+## Assignment Description
+
+The purpose of this paper is to use the statistical and computational techniques learned in Math 367 (or elsewhere) to investigate a question of your own in sports analytics. The paper should be **2–4 pages** of written analysis (longer if your project genuinely needs it), and must include working Python code embedded in a Quarto notebook.
+
+The six required components are described below.
+
+---
+
+### 1. Sport Background
+
+Choose whichever sport you like. Briefly introduce the sport in enough detail that a reader unfamiliar with it can follow the rest of your paper. This means:
+
+- Defining any sport-specific terminology you will use.
+- Explaining the relevant rules or scoring structure if they bear on your analysis.
+- Giving just enough context. Do not write a history of the sport. If your question is about fourth-down conversion rates in college football, the reader needs to understand what fourth down is and why it matters strategically. They do not need the history of the forward pass.
+
+---
+
+### 2. Thesis
+
+State clearly the question you are trying to answer. A good thesis is **specific** and **testable**. "Is defense important in the NBA?" is not a thesis. "Do teams in the top quartile of defensive rating have a statistically different playoff win rate than teams in the bottom quartile, controlling for offensive rating?" is.
+
+Along with your question, discuss:
+
+- Why the question is interesting or meaningful for the sport.
+- What the potential impact of an answer would be on strategy, team-building, player evaluation, or something else.
+- What you expected to find before doing the analysis, and why.
+
+---
+
+### 3. Data
+
+You are responsible for finding your own data. This is a real constraint and it should shape your question early. Good sources include Sports Reference sites (Baseball Reference, Basketball Reference, Football Reference, FBref), Baseball Savant / Statcast, the `nfl_data_py` and `pybaseball` Python packages, Sports Reference CSV downloads, and publicly available Kaggle datasets.
+
+Address the following in this section:
+
+- **What data did you use?** Give the source, the time period covered, and the unit of observation (one row per game? per player-season? per play?).
+- **How did you obtain it?** Your code must load or scrape the data automatically. Do not require the grader to download files manually. If you use a local CSV, include it with your submission.
+- **What are the limitations of your data?** Every dataset has gaps, biases, or constraints that affect which questions you can answer. Acknowledge them.
+
+A note on scope: if your question requires data that would take months to collect, scale it back. A well-executed analysis on a limited dataset is far more valuable than an ambitious question that collapses because the data was unmanageable. You can always discuss how a larger or richer dataset would improve your results in the Areas of Improvement section.
+
+---
+
+### 4. Analysis
+
+This is the heart of the paper. You must apply at least one **advanced analytical method or metric** to your data. This could be:
+
+- A constructed metric (WAR-style aggregation, a custom efficiency rating, etc.)
+- Regression (linear, logistic, multiple)
+- Hypothesis testing (t-test, chi-square, permutation test, etc.)
+- Simulation or bootstrapping
+- Clustering (k-means, hierarchical, etc.)
+- Any other method covered in the course or used in the field
+
+Whatever you choose, it must be **appropriate for your question**. Applying a regression when you only have three data points is not appropriate. Running a hypothesis test without checking assumptions is not appropriate. Choosing a method because you know how to use it, when a different method fits the question better, is not appropriate.
+
+Your explanation of the method should be thorough enough that **a reader could reproduce your results** from scratch. This means:
+
+- State the method and explain why it fits your question.
+- Show the formula or procedure, not just the Python call.
+- Walk through the key steps with actual numbers where possible.
+- Comment your Python code so that someone reading it understands what each block is doing.
+
+If you compute a custom metric, the reader should be able to take your code and compute the metric for a new player or team by following your work, just as a reader could follow a WAR calculation after reading a good WAR explainer.
+
+---
+
+### 5. Conclusion
+
+State your conclusion clearly and make sure it is **proportional to your evidence**.
+
+- If you ran a hypothesis test and did not meet the 5% significance threshold, your conclusion is: *"We do not have sufficient evidence to conclude that..."* and not *"our results suggest that..."* followed by a claim you didn't actually establish.
+- If your regression has a low $R^2$, do not claim strong predictive power.
+- If your sample is limited (a single season, one team, a small subset of players), be explicit about the scope of the conclusion.
+
+Do not overreach. A modest, honest conclusion supported by your work is worth far more than a sweeping claim that your analysis does not justify.
+
+---
+
+### 6. Areas of Improvement
+
+Reflect critically on your own analysis. What would make it better? Possibilities include:
+
+- Expanding the dataset (more seasons, more leagues, more granular data)
+- Improving a simulation to add more realism
+- Collecting data that doesn't currently exist
+- Using a more sophisticated model
+- Controlling for additional confounding variables
+- Proposing an entirely new metric suggested by your findings
+
+This section is important. Good studies talk about their limitations. It demonstrates that you understand the limits of your own work and can think clearly about what the next step would be.
+
+---
+
+### 7. Format and Submission
+
+- Submit your paper as a **Quarto markdown file (`.qmd`)**.
+- Submit any data files (`.csv`, `.json`, etc.) needed to run your code. If your data is loaded via a web scrape, your code must perform this automatically. The grader should not need to download anything manually other than the files you submit, or possibly a Python package.
+- **Your code must execute without errors.** You will lose points if the Python code fails to run.
+- Comment your code. Every meaningful block of Python should have a comment explaining what it is doing.
+- Length: **2–4 pages** of written prose (not counting code, output, or plots). Slightly longer is acceptable if the project genuinely requires it, but length is not a substitute for depth.
+
+**Due: Friday, April 24, 2025 at 11:59pm**
+
+---
+
+## Resources for Finding Data
+
+The following are reliable starting points. This list is not exhaustive.
+
+| Source | Link | What's available |
+|--------|------|-----------------|
+| **Baseball Reference** | [baseball-reference.com](https://www.baseball-reference.com) | Comprehensive MLB stats; CSV downloads available |
+| **Basketball Reference** | [basketball-reference.com](https://www.basketball-reference.com) | NBA/WNBA stats, play-by-play |
+| **Football Reference** | [pro-football-reference.com](https://www.pro-football-reference.com) | NFL stats; CSV downloads |
+| **College Football Reference** | [sports-reference.com/cfb](https://www.sports-reference.com/cfb/) | NCAA football |
+| **FBref** | [fbref.com](https://fbref.com) | Soccer: xG, progressive passes, defensive actions |
+| **Baseball Savant** | [baseballsavant.mlb.com](https://baseballsavant.mlb.com) | Statcast: exit velocity, spin rate, launch angle |
+| **pybaseball** | `pip install pybaseball` | Python package for Baseball Reference + Statcast |
+| **nfl_data_py** | `pip install nfl-data-py` | Python package for NFL play-by-play data |
+| **Kaggle Sports Datasets** | [kaggle.com/datasets](https://www.kaggle.com/datasets?search=sports) | Community-uploaded datasets across many sports |
+| **StatsBomb Open Data** | [github.com/statsbomb/open-data](https://github.com/statsbomb/open-data) | Free event-level soccer data (select competitions) |
+
+---
+
+## Rubric
+
+Your paper will be graded out of **75 points** using the criteria below.
+
+| Criterion | Points | Description |
+|-----------|--------|-------------|
+| **Sport Background** | 6 | The reader understands the sport, the relevant rules, and the terminology well enough to follow the paper without prior knowledge. |
+| **Thesis & Impact** | 9 | The question is specific and testable. The potential impact of an answer on the sport is clearly articulated. |
+| **Data** | 9 | Data source is documented. Code loads data automatically. Limitations of the dataset are acknowledged. |
+| **Analysis — Method Choice** | 8 | The chosen method is appropriate for the question. The choice is justified. |
+| **Analysis — Execution & Reproducibility** | 19 | The method is explained thoroughly. Formulas and key steps are shown. A reader could reproduce the results. Code is correct and commented. |
+| **Conclusion** | 11 | Conclusion is appropriate to the evidence. Does not overreach. Scope limitations are acknowledged. |
+| **Areas of Improvement** | 8 | Substantive and specific discussion of how the analysis could be extended or improved. |
+| **Writing Quality** | 5 | Paper is well-organized, clearly written, and appropriate in length. Prose is readable by a non-specialist. |
+| **Total** | **75** | |
+
+---
+
+### Rubric Detail
+
+**Thesis & Impact (9 pts)**
+
+- 8–9: The question is specific enough to be answered with data. Why the answer would matter for the sport is clearly and compellingly explained.
+- 5–7: The question is reasonable but vague, or the discussion of impact is cursory.
+- 3–4: The question is interesting but not clearly testable, or there is no meaningful discussion of impact.
+- 0–2: The question is ill-defined or absent.
+
+**Analysis — Method Choice (8 pts)**
+
+- 7–8: The method is clearly appropriate for the question and the choice is explicitly justified with reference to alternatives.
+- 5–6: The method is reasonable but the justification is thin or the fit is imperfect.
+- 2–4: The method is applied mechanically without evidence of understanding why it fits (or doesn't fit) the question.
+- 0–1: The method is inappropriate for the question, or no method is used.
+
+**Analysis — Execution & Reproducibility (19 pts)**
+
+- 16–19: The method is explained step-by-step with formulas. Key calculations are shown with real numbers. Code is commented throughout, runs without errors, and a reader could reproduce every result.
+- 11–15: The method is mostly explained; some steps are glossed over. Code runs but some comments are missing. Reproducing results requires some inference.
+- 5–10: The method is described at a high level but not in sufficient detail to reproduce. Code runs but is uncommented or produces output not tied clearly to the analysis.
+- 0–4: The method is named but not meaningfully executed, or code does not run.
+
+**Conclusion (11 pts)**
+
+- 10–11: Conclusion is precisely calibrated to the results. Uncertainty or lack of evidence is stated clearly. Scope is explicitly limited to the data used.
+- 7–9: Conclusion is generally appropriate but contains one instance of overreach or a claim slightly beyond what the evidence supports.
+- 4–6: Conclusion makes claims that the analysis does not support, or the language obscures what was actually found.
+- 0–3: Conclusion contradicts the results, is missing, or makes claims entirely unsupported by the analysis.
+
+**Areas of Improvement (8 pts)**
+
+- 7–8: Specific, realistic improvements are proposed and connected to the limitations identified in the Data section or Conclusion. At least two distinct directions are explored.
+- 5–6: Improvements are mentioned but are generic ("more data would help") without specificity about what kind of data or how it would change the analysis.
+- 3–4: Only one improvement is mentioned or the discussion is superficial.
+- 0–2: Section is absent or consists of a single vague sentence.
+
+**Writing Quality (5 pts)**
+
+- 5: Paper is well-organized with a clear structure. Prose is readable. Technical content is accessible. Length is appropriate to the project.
+- 3–4: Organization is adequate but transitions between sections are rough, or prose is occasionally unclear.
+- 2: Significant organizational problems or frequent unclear passages.
+- 0–1: Paper is difficult to follow or far too short to assess the work.

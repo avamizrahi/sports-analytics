@@ -1,0 +1,245 @@
+---
+title: "Research Paper — Advanced Analytics in Sports"
+author: "Adapted by Jason Aubrey from material by Aaron Ekstrom"
+format:
+  html: default
+  pdf: default
+fontsize: 11pt
+---
+
+## A Note on Advanced Analytics
+
+Modern sports analytics has moved far beyond batting averages and points per game. The most powerful tools today are **context-adjusted, multi-component metrics** that attempt to answer a single question: *how much does this player actually contribute to winning?*
+
+Below is a brief introduction to several of the most widely used advanced metrics, along with a concrete example in each of the four major sports. These are the kinds of metrics you are likely to encounter when searching for articles to analyze in this assignment.
+
+**Important Note**: You may use one of the metrics below, but you are not required to. If you find an article that uses a different advanced metric, that is perfectly fine, and actually encouraged. Just make sure to explain it clearly in your paper. If you use one of the metrics below, do not simply copy the explanations here and do not use the articles highlighted below as your primary source. You must find a different article that uses the metric and analyze it in your own words.
+
+---
+
+### Where to Find Advanced Analytics Writing
+
+The following are excellent sources for sports analytics articles:
+
+| Source | Link | Focus |
+|--------|------|-------|
+| **FiveThirtyEight** | [fivethirtyeight.com](https://fivethirtyeight.com/sports/) | Data-driven pieces across all sports (archive; new content at [abc538](https://www.abcnews.com/538)) |
+| **The Ringer** | [theringer.com](https://www.theringer.com/) | Long-form analytics journalism |
+| **Baseball Prospectus** | [baseballprospectus.com](https://www.baseballprospectus.com/) | Deep MLB metrics (WAR, DRC+, FRAA, etc.) |
+| **The Athletic** | [nytimes.com/athletic](https://www.nytimes.com/athletic) | Professional analytics across sports (moved from theathletic.com) |
+| **StatsBomb** | [statsbomb.com](https://statsbomb.com/articles/soccer/) | Soccer analytics |
+| **ESPN Analytics** | [espn.com/nfl/qbr](https://www.espn.com/nfl/qbr) | QBR, RPM, BPI |
+| **Basketball Reference** | [basketball-reference.com](https://www.basketball-reference.com/) | PER, BPM, VORP, Win Shares |
+| **Baseball Reference** | [baseball-reference.com](https://www.baseball-reference.com/) | WAR, OPS+, ERA+ |
+| **FanGraphs** | [fangraphs.com](https://www.fangraphs.com/) | fWAR, wOBA, wRC+, FIP |
+| **FBref** | [fbref.com](https://fbref.com/en/) | Soccer xG, xA, progressive passes |
+| **Baseball Savant** | [baseballsavant.mlb.com](https://baseballsavant.mlb.com/) | Statcast: exit velocity, launch angle, spin rate |
+
+---
+
+### Key Advanced Metrics
+
+#### WAR — Wins Above Replacement (Baseball)
+
+WAR attempts to summarize a player's total contribution to their team in a single number: *how many more wins did this player produce compared to a freely available "replacement-level" player* (roughly a minor-league callup)?
+
+The formula combines several components:
+
+$$\text{WAR} = \frac{\text{Batting Runs} + \text{Baserunning Runs} + \text{Fielding Runs} + \text{Positional Adjustment} + \text{League Adjustment} + \text{Replacement Runs}}{\text{Runs Per Win}}$$
+
+Each component is expressed in *runs above average*. The result is converted to wins using the empirical rule that roughly 9–10 runs equals one win.
+
+**Baseball Example:** Mike Trout has accumulated a career WAR of approximately 87 (87.2 on [FanGraphs](https://www.fangraphs.com/players/mike-trout/10155/stats?position=OF), 87.5 on [Baseball Reference](https://www.baseball-reference.com/players/t/troutmi01.shtml)), meaning he has contributed roughly 87 more wins than a replacement-level center fielder would have over the same period. By comparison, a typical All-Star season is worth 4–6 WAR. This single number makes it easy to compare players across eras, positions, and teams.
+
+**Strengths:** Accounts for offense, defense, and position; easy to compare players across decades.
+**Weaknesses:** Fielding metrics are noisy, especially in small samples; different data providers (FanGraphs vs. Baseball Reference) calculate WAR differently, producing meaningfully different values for the same player. For a detailed walkthrough of how fWAR is calculated, see the [FanGraphs Sabermetrics Library](https://library.fangraphs.com/misc/war/).
+
+---
+
+#### PER — Player Efficiency Rating (Basketball)
+
+PER, developed by John Hollinger, is a per-minute rating of a player's statistical productivity, normalized so that the league average is always 15.
+
+The core calculation sums positive contributions (points, rebounds, assists, steals, blocks) and subtracts negative ones (turnovers, missed shots), then adjusts for pace and minutes played:
+
+$$\text{PER} = \frac{1}{\text{MP}} \left[ \text{Positive Stats} - \text{Negative Stats} \right] \times \frac{C_{\text{team}}}{\text{team pace}} \times \frac{15}{\text{league average uPER}}$$
+
+(where $C_{\text{team}}$ is a team pace factor)
+
+**Basketball Example:** Nikola Jokić currently leads all NBA history with a career PER of 28.51, followed by Michael Jordan (27.91) and LeBron James (26.88), per [Basketball Reference](https://www.basketball-reference.com/leaders/per_career.html). A PER of 15 is average; 20+ indicates an All-Star; 25+ is an MVP-caliber season. This allows us to meaningfully compare, say, Steph Curry's current season to Magic Johnson's peak.
+
+**Strengths:** Widely cited, easy to understand, normalizes for minutes played.
+**Weaknesses:** Ignores defense entirely; rewards high-volume scorers; favors centers due to the relative value assigned to rebounds and blocks.
+
+---
+
+#### QBR — Total Quarterback Rating (Football)
+
+ESPN's QBR (introduced in 2011) measures a quarterback's total contribution to scoring, scaled from 0 to 100, where 50 is average. Unlike traditional passer rating, QBR:
+
+- Includes **rushing contributions** (scrambles, designed runs)
+- **Credit-adjusts** for the difficulty of each play (yards after catch, drops, defensive coverage)
+- Accounts for **clutch situations** by weighting plays based on win probability impact
+
+$$\text{QBR} = f\left(\text{Expected Points Added}_{\text{passing}} + \text{EPA}_{\text{rushing}} + \text{EPA}_{\text{penalties}}\right)$$
+
+scaled and credit-adjusted to [0, 100].
+
+**Football Example:** Patrick Mahomes has led the NFL in QBR in multiple seasons, typically posting values in the 75–85 range ([ESPN QBR leaderboard](https://www.espn.com/nfl/qbr)). A QBR of 50 is exactly average; below 40 is poor; above 70 is elite. This makes it easy to see that a quarterback who throws for 300 yards on 7-yard dump-offs is contributing less than one who throws for 250 yards in tight coverage on third-and-long. QBR was introduced by ESPN on August 5, 2011.
+
+**Strengths:** Comprehensive (passing + rushing + context); harder to "game" with empty stats than traditional passer rating.
+**Weaknesses:** ESPN's proprietary algorithm is not fully public; some analysts distrust the "credit adjustment" component. For a critical analysis of what QBR captures and misses, see The Ringer's [*The NFL's Quest to Quantify Quarterback Evaluation*](https://www.theringer.com/2020/4/17/21224389/nfl-draft-quantifying-quarterback-evaluation) (2020).
+
+---
+
+#### xG — Expected Goals (Soccer)
+
+xG (Expected Goals) assigns each shot a probability between 0 and 1 representing the likelihood it results in a goal, based on historical data for shots taken from similar positions and circumstances.
+
+$$\text{xG}_{\text{shot}} = P(\text{goal} \mid \text{location, type, situation, body part}, \ldots)$$
+
+A team's or player's total xG over a match or season tells you how many goals they *should* have scored given the quality of their chances — independently of whether the ball actually went in.
+
+**Soccer Example:** In the 2022–23 UEFA Champions League, Erling Haaland [led all scorers with 12 goals](https://www.uefa.com/uefachampionsleague/news/0279-160c8d06ee70-7766a7d071f5-1000--champions-league-top-scorers-2022-23-erling-haaland-finishe/) while generating an xG substantially lower than his actual output — meaning he consistently converted chances at a rate well above what the shot quality alone would predict, a hallmark of elite finishing. By contrast, a team with 2.5 xG that scores 0 goals in a match likely ran into an exceptional goalkeeper performance rather than a true offensive collapse.
+
+**Strengths:** Separates luck from skill; useful for predicting future performance; applicable to teams and individuals.
+**Weaknesses:** xG models vary by provider (StatsBomb, Opta, etc.); does not capture post-shot adjustments (e.g., placement quality within the target area) without extended models (xGOT — Expected Goals on Target). For an accessible introduction see StatsBomb's [*What are Expected Goals (xG)?*](https://statsbomb.com/soccer-metrics/expected-goals-xg-explained/) and FBref's [xG model explainer](https://fbref.com/en/expected-goals-model-explained/).
+
+---
+
+#### Real Plus/Minus (RPM) — Basketball
+
+RPM, developed by ESPN in collaboration with Jeremias Engelmann, estimates a player's per-100-possessions contribution to their team's point differential, holding teammates and opponents constant through a regularized regression.
+
+$$\text{Net Points per 100} \approx \beta_{\text{player}} + \text{lineup effects} + \epsilon$$
+
+RPM is split into **ORPM** (offensive) and **DRPM** (defensive), with a combined **RPM** and a **Wins** value (RPMW) converting impact to estimated wins.
+
+**Basketball Example:** In recent NBA seasons, Nikola Jokić has consistently posted among the highest RPM values in the league ([ESPN RPM](https://www.espn.com/nba/story/_/id/10740818/cracking-code-real-plus-minus)), meaning that with him on the court his team outscored opponents by several more points per 100 possessions than they would with an average player. This contextual adjustment is why RPM often ranks differently from raw +/- or PER — it separates individual skill from lineup quality.
+
+**Strengths:** Controls for teammates and opponents; captures both offense and defense.
+**Weaknesses:** Requires large sample sizes to stabilize; penalizes players on dominant teams (less opportunity to show individual impact).
+
+---
+
+## Assignment Description
+
+The purpose of this paper is to find and analyze a published sports analytics article or paper that uses an advanced metric or analytical method. You will explain the methodology to a general audience, evaluate its strengths and weaknesses, and attempt to reproduce key calculations in Python.
+
+Your paper should be **3–5 pages** of written analysis (not counting code and output) and must address all of the following:
+
+### 1. Summary of the Article
+
+Provide a clear summary of the article you chose. What is the author's main thesis? What question are they trying to answer? What sport and what players or teams are involved?
+
+### 2. Examination of the Key Analytical Metric
+
+This is the core of the paper. Devote the most space to this section. Address all four of the following:
+
+**A. Explanation of the metric:**
+Walk your reader through how the metric is calculated, step by step. Include the formula if one exists. Your explanation should be detailed enough that a student who has not read the article could calculate the metric themselves. *If you can get hold of the data used in the article and reproduce the calculation in Python, this is strongly encouraged.*
+
+**B. Positive features:**
+What does this metric do well? How is it an improvement over simpler, older methods? Why did the author choose this metric rather than a more traditional statistic?
+
+**C. Negative features:**
+What are the limitations of this metric? What assumptions does it make that might not hold? What improvements should be made? What does it fail to capture?
+
+**D. Connection to the author's argument:**
+How does the metric support (or complicate) the author's thesis? Are there any concerns about using this particular metric to support this particular argument?
+
+### 3. Other Analytics in the Article
+
+If the article uses other analytical methods or metrics beyond the primary one you analyzed, give a brief description of each. Comment on whether each one is used appropriately to support the argument.
+
+### 4. Python Code
+
+You must include Python code in your `.qmd` file. At minimum your code should:
+
+- Load or scrape any data relevant to your analysis.
+- Reproduce or demonstrate the key metric calculation on real data.
+- Produce at least one meaningful plot or table that supports your written analysis.
+
+Your code must run without errors.
+
+---
+
+
+
+## Format and Submission
+
+- Submit your **Quarto notebook** (`.qmd` file) rendered to PDF or HTML through GitHub Classroom.
+- Include any data files (`.csv`, etc.) needed for your code to run. If your data is scraped from the web, your code must do the scraping automatically — the grader should not need to download anything manually.
+- Length: **3–5 pages** of written prose, not counting code blocks, output, or plots.
+- Write for an audience that is a fellow DATA 367 student — assume they understand regression and simulation, but not necessarily this specific metric.
+
+**Due: Friday April 3rd at 11:59pm**
+
+---
+
+## Suggested Articles
+
+If you are struggling to find an article, the following are a good starting point. Each link has been verified.
+
+**Baseball**
+
+- [*What is WAR?*](https://library.fangraphs.com/misc/war/) — FanGraphs Sabermetrics Library. The definitive public explanation of Wins Above Replacement, including a [complete position-player calculation walkthrough](https://library.fangraphs.com/calculating-position-player-war-a-complete-example/).
+- [*Introducing Deserved Runs Created Plus (DRC+)*](https://www.baseballprospectus.com/news/article/45338/introducing-deserved-runs-created-plus-drc/) — Baseball Prospectus. Explains BP's hitting metric and why it differs from OPS+ and wRC+. See also [*Why DRC+*](https://www.baseballprospectus.com/news/article/45432/why-drc/) and [*Comparing DRC+, OPS+, and wRC+*](https://www.baseballprospectus.com/news/article/45445/comparing-drc-ops-and-wrc/).
+- [Statcast Metrics Context](https://baseballsavant.mlb.com/statcast-metrics-context) and [Exit Velocity & Launch Angle Breakdown](https://baseballsavant.mlb.com/statcast_field) — Baseball Savant. The official MLB explainers for Statcast data including exit velocity, launch angle, and spin rate.
+
+**Basketball**
+
+- [*Introducing RAPTOR, Our New Metric for the Modern NBA*](https://fivethirtyeight.com/features/introducing-raptor-our-new-metric-for-the-modern-nba/) — FiveThirtyEight (2019). Introduces a modern all-in-one player rating built on player-tracking data.
+- [*How Our RAPTOR Metric Works*](https://fivethirtyeight.com/features/how-our-raptor-metric-works/) — FiveThirtyEight (2019). The methodological companion to the article above.
+- [*Cracking the Code of Real Plus-Minus*](https://www.espn.com/nba/story/_/id/10740818/cracking-code-real-plus-minus) — ESPN. Explains RPM, developed by Jeremias Engelmann, and how it differs from raw plus/minus.
+
+**Football**
+
+- [*The NFL's Quest to Quantify Quarterback Evaluation*](https://www.theringer.com/2020/4/17/21224389/nfl-draft-quantifying-quarterback-evaluation) — The Ringer (2020). Examines how player-tracking data has created new contextual metrics for evaluating QB accuracy and decision-making.
+- [*The NFL's Analytics Revolution Has Arrived*](https://www.theringer.com/nfl/2018/12/19/18148153/nfl-analytics-revolution) — The Ringer (2018). A broader look at how analytics has spread through the NFL.
+
+**Soccer**
+
+- [*What are Expected Goals (xG)?*](https://statsbomb.com/soccer-metrics/expected-goals-xg-explained/) — StatsBomb. Clear introduction to the xG concept.
+- [*Upgrading Expected Goals*](https://statsbomb.com/articles/soccer/upgrading-expected-goals/) — StatsBomb. A more advanced discussion of improving xG models.
+- [*xG Explained*](https://fbref.com/en/expected-goals-model-explained/) — FBref. How FBref's specific xG model is constructed.
+
+---
+
+## Rubric
+
+Your paper will be graded out of **75 points** using the criteria below.
+
+| Criterion | Points | Description |
+|-----------|--------|-------------|
+| **Summary of Article** | 12 | Accurately describes the author's thesis and main argument. The reader understands the article's purpose without having read it. |
+| **Metric Explanation** | 18 | Thorough, step-by-step explanation of the key metric including its formula. A reader unfamiliar with the metric could follow the calculation. Reproducing the metric in Python earns full marks. |
+| **Strengths & Weaknesses** | 12 | Thoughtful, specific discussion of the metric's advantages over older methods and its genuine limitations. Avoids vague or generic claims. |
+| **Connection to Argument** | 10 | Clearly explains how the metric supports the author's thesis. Identifies any tension between what the metric can show and what the author claims. |
+| **Other Analytics** | 8 | Brief but accurate descriptions of any secondary metrics in the article, with a comment on whether each is used appropriately. |
+| **Python Code** | 10 | Code runs without errors. Data is loaded automatically (no manual downloads required). At least one meaningful plot or table is produced. |
+| **Writing Quality** | 5 | Paper is 3–5 pages, well-organized, and written for the intended audience. Prose is clear and readable by a non-specialist. |
+| **Total** | **75** | |
+
+### Rubric Detail
+
+**Metric Explanation (18 pts)**
+
+- 16–18: Formula is given and clearly explained; calculation is walked through step-by-step with real numbers; Python code reproduces the metric on real data.
+- 11–15: Formula is given and mostly explained; some steps are glossed over; code attempts reproduction but may be incomplete.
+- 6–10: Metric is described at a high level but the explanation is not detailed enough to reproduce the calculation; code is missing or non-functional.
+- 0–5: Metric is mentioned but not meaningfully explained.
+
+**Strengths & Weaknesses (12 pts)**
+
+- 10–12: Strengths and weaknesses are specific and grounded in the metric's design. Weaknesses include concrete suggestions for improvement.
+- 7–9: Both are addressed but at a surface level; weaknesses are generic (e.g., "small sample sizes").
+- 4–6: Only one side (strengths or weaknesses) is meaningfully addressed.
+- 0–3: Little to no meaningful analysis.
+
+**Python Code (10 pts)**
+
+- 9–10: All code runs without errors. Data loads automatically. At least one plot/table is produced and is relevant to the analysis.
+- 6–8: Code runs but requires minor manual intervention (e.g., editing a file path); plot is present but not well-labeled.
+- 3–5: Code has errors or is incomplete; does not successfully demonstrate the metric.
+- 0–2: No code, or code is entirely non-functional.
